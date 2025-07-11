@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertidor de Enlaces y Coordenadas de Mapas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #notification {
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        /* Styles for active and inactive tabs */
+        .tab.active {
+            border-color: #3b82f6; /* blue-500 */
+            color: #3b82f6;
+            background-color: #eff6ff; /* blue-50 */
+        }
+        .dark .tab.active {
+            background-color: #1e3a8a; /* blue-900 */
+            color: #dbeafe; /* blue-100 */
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen transition-colors duration-300 p-4">
+
+    <div class="w-full max-w-lg mx-auto p-6 sm:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl space-y-6 relative overflow-hidden">
+        
+        <!-- Header -->
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Conversor Universal de Mapas</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">Pega un enlace o introduce coordenadas para convertir.</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-200 dark:border-gray-700">
+            <button id="tab-url" class="tab active flex-1 py-2 px-4 text-center font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-blue-600 transition-colors">Desde URL</button>
+            <button id="tab-coords" class="tab flex-1 py-2 px-4 text-center font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-blue-600 transition-colors">Desde Coordenadas</button>
+        </div>
+
+        <!-- Input Forms -->
+        <div class="space-y-4">
+            <!-- URL Input -->
+            <div id="content-url" class="tab-content active">
+                <label for="googleMapsUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Enlace de Google Maps</label>
+                <input type="url" id="googleMapsUrl" placeholder="https://maps.app.goo.gl/..." class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200" autocomplete="off">
+            </div>
+            <!-- Coordinates Input -->
+            <div id="content-coords" class="tab-content">
+                 <label for="coordsInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coordenadas (Decimal o GMS)</label>
+                <input type="text" id="coordsInput" placeholder="Ej: 17°45'40.1&quot;S 63°10'13.1&quot;W" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200" autocomplete="off">
+            </div>
+
+            <button id="convertBtn" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                Convertir
+            </button>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="pt-4 space-y-3"></div>
+
+        <!-- Error Message Box -->
+        <div id="error-message" class="hidden p-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 rounded-lg">
+            <p id="error-text"></p>
+        </div>
+
+        <!-- Notification for 'Copied' -->
+        <div id="notification" class="absolute bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transform translate-y-10">
+            ¡Copiado!
+        </div>
+
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const convertBtn = document.getElementById('convertBtn');
+        const googleMapsUrlInput = document.getElementById('googleMapsUrl');
+        const coordsInput = document.getElementById('coordsInput');
+        const resultsDiv = document.getElementById('results');
+        const errorMessageDiv = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        const notificationDiv = document.getElementById('notification');
+        const tabUrl = document.getElementById('tab-url');
+        const tabCoords = document.getElementById('tab-coords');
+        const contentUrl = document.getElementById('content-url');
+        const contentCoords = document.getElementById('content-coords');
+
+        let activeTab = 'url'; // 'url' or 'coords'
+
+        // --- Event Listeners ---
+        convertBtn.addEventListener('click', handleConversion);
+        googleMapsUrlInput.addEventListener('keypress', (e) => e.key === 'Enter' && handleConversion());
+        coordsInput.addEventListener('keypress', (e) => e.key === 'Enter' && handleConversion());
+        googleMapsUrlInput.addEventListener('input', clearResults);
+        coordsInput.addEventListener('input', clearResults);
+
+        tabUrl.addEventListener('click', () => switchTab('url'));
+        tabCoords.addEventListener('click', () => switchTab('coords'));
+
+        /**
+         * Switches the active tab and content.
+         * @param {string} tabName - The name of the tab to switch to ('url' or 'coords').
+         */
+        function switchTab(tabName) {
+            activeTab = tabName;
+            clearAll();
+            if (tabName === 'url') {
+                tabUrl.classList.add('active');
+                tabCoords.classList.remove('active');
+                contentUrl.classList.add('active');
+                contentCoords.classList.remove('active');
+            } else {
+                tabUrl.classList.remove('active');
+                tabCoords.classList.add('active');
+                contentUrl.classList.remove('active');
+                contentCoords.classList.add('active');
+            }
+        }
+
+        /**
+         * Main function to handle the link/coordinate conversion process.
+         */
+        function handleConversion() {
+            let coords = null;
+            if (activeTab === 'url') {
+                const url = googleMapsUrlInput.value.trim();
+                if (!url) { clearResults(); return; }
+                if (url.startsWith('https://maps.app.goo.gl')) {
+                    showError('short-url', url);
+                    return;
+                }
+                coords = extractCoordinatesFromUrl(url);
+                if (!coords) showError('invalid-url');
+
+            } else { // activeTab === 'coords'
+                const coordString = coordsInput.value.trim();
+                if (!coordString) { clearResults(); return; }
+                coords = parseCoordinates(coordString);
+                if (!coords) showError('invalid-coords');
+            }
+
+            if (coords) {
+                hideError();
+                generateLinks(coords.lat, coords.lon);
+            }
+        }
+
+        /**
+         * Parses a string to find coordinates, supporting Decimal and DMS formats.
+         * @param {string} str - The coordinate string.
+         * @returns {{lat: number, lon: number}|null}
+         */
+        function parseCoordinates(str) {
+            // Try to parse as Decimal: e.g., "-17.761, -63.170"
+            let match = str.match(/^(-?\d+\.?\d*)[, ]+(-?\d+\.?\d*)$/);
+            if (match) {
+                return { lat: parseFloat(match[1]), lon: parseFloat(match[2]) };
+            }
+
+            // Try to parse as DMS: e.g., 17°45'40.1"S 63°10'13.1"W
+            const dmsRegex = /(\d+)[°\s]+(\d+)[',\s]+([\d.]+)"?\s*([NS])[, ]+(\d+)[°\s]+(\d+)[',\s]+([\d.]+)"?\s*([WE])/i;
+            match = str.match(dmsRegex);
+            if (match) {
+                const [, latD, latM, latS, latDir, lonD, lonM, lonS, lonDir] = match;
+                let lat = parseFloat(latD) + (parseFloat(latM) / 60) + (parseFloat(latS) / 3600);
+                if (latDir.toUpperCase() === 'S') lat = -lat;
+
+                let lon = parseFloat(lonD) + (parseFloat(lonM) / 60) + (parseFloat(lonS) / 3600);
+                if (lonDir.toUpperCase() === 'W') lon = -lon;
+                
+                return { lat, lon };
+            }
+            return null;
+        }
+
+        /**
+         * Extracts latitude and longitude from various Google Maps URL formats.
+         * @param {string} url - The Google Maps URL.
+         * @returns {{lat: number, lon: number}|null}
+         */
+        function extractCoordinatesFromUrl(url) {
+            const patterns = [
+                /@(-?\d+\.\d+),(-?\d+\.\d+)/,
+                /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,
+                /ll=(-?\d+\.\d+),(-?\d+\.\d+)/,
+                /search\/(-?\d+\.\d+),(-?\d+\.\d+)/,
+                /query=(-?\d+\.\d*),(-?\d+\.\d*)/
+            ];
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match.length >= 3) {
+                    return { lat: parseFloat(match[1]), lon: parseFloat(match[2]) };
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Generates and displays the map links with copy buttons.
+         * @param {number} lat - The latitude.
+         * @param {number} lon - The longitude.
+         */
+        function generateLinks(lat, lon) {
+            clearResults();
+            const fallbackUrl = encodeURIComponent('https://play.google.com/store/apps/details?id=com.yandex.yango');
+            const links = [
+                { name: 'Waze', url: `https://waze.com/ul?ll=${lat},${lon}&navigate=yes`, color: 'bg-indigo-500 hover:bg-indigo-600' },
+                { name: 'Apple Maps', url: `http://maps.apple.com/?ll=${lat},${lon}&q=Ubicación`, color: 'bg-sky-500 hover:bg-sky-600' },
+                { name: 'Yango (Viaje/Envío)', url: `intent://route?end_lat=${lat}&end_lon=${lon}&tariffClass=express#Intent;scheme=yandextaxi;package=com.yandex.yango;S.browser_fallback_url=${fallbackUrl};end`, color: 'bg-amber-500 hover:bg-amber-600' },
+                { name: 'OpenStreetMap', url: `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}&zoom=16`, color: 'bg-emerald-500 hover:bg-emerald-600' },
+                { name: 'Geo Link (Móvil)', url: `geo:${lat},${lon}`, color: 'bg-gray-500 hover:bg-gray-600' }
+            ];
+
+            // Full SVG content
+            const fullIcons = {
+                'Waze': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8"><path d="M14.61 4.416c-1.936-.55-3.953-.42-5.783.33a.75.75 0 00-.33 1.05c.3.56.96.78 1.52.48 1.3-.36 2.68-.42 3.99-.12a.75.75 0 00.6-.94zm-10.22 6.54c.24-1.8 1.14-3.45 2.5-4.74a.75.75 0 00-1.05-1.05c-1.56 1.48-2.61 3.42-2.91 5.61a.75.75 0 00.75.87c.4-.03.72-.36.69-.75l-.03-.2a.75.75 0 00-.03-.2zm7.62 9.294c1.82.51 3.73.48 5.49-.09a.75.75 0 00.45-1.11c-.39-.52-1.08-.66-1.62-.33-1.29.33-2.61.39-3.87.12a.75.75 0 00-.69.99c.06.33.27.6.54.42zm-1.6-6.264a3 3 0 116 0 3 3 0 01-6 0zm-1.5-3a4.5 4.5 0 109 0 4.5 4.5 0 00-9 0z"></path></svg>`,
+                'Apple Maps': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8"><path d="M12.01 2.011c-4.29 0-7.93 3.3-8.01 7.59v.01c0 4.3 3.71 7.83 8 7.83s8-3.54 8-7.83v-.01c-.07-4.29-3.71-7.59-7.99-7.59zm-4.3 7.59c0-2.37 1.93-4.3 4.3-4.3s4.3 1.93 4.3 4.3c0 2.36-1.93 4.3-4.3 4.3s-4.3-1.93-4.3-4.3zm10.3 5.43l-2.11 2.12c-.2.2-.45.29-.71.29s-.51-.1-.71-.29l-1.42-1.42-1.42 1.42c-.2.2-.45.29-.71.29s-.51-.1-.71-.29l-2.11-2.12c-1.31.76-2.29 2.04-2.29 3.54v.01c0 .06 0 .12.01.17h16.98c0-.06.01-.11.01-.17v-.01c0-1.5-1-2.78-2.29-3.54z"></path></svg>`,
+                'Yango (Viaje/Envío)': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8"><path d="M12.89 2.1L7.54 12.82H12.4L11.11 21.9L16.46 11.18H11.6L12.89 2.1Z"/></svg>`,
+                'OpenStreetMap': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8"><path d="M12 2c-4.418 0-8 3.582-8 8 0 4.419 8 14 8 14s8-9.581 8-14c0-4.418-3.582-8-8-8zm0 11.5c-1.933 0-3.5-1.567-3.5-3.5s1.567-3.5 3.5-3.5 3.5 1.567 3.5 3.5-1.567 3.5-3.5 3.5z"></path></svg>`,
+                'Geo Link (Móvil)': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path></svg>`
+            };
+
+            const resultsTitle = document.createElement('h3');
+            resultsTitle.className = "text-lg font-semibold text-gray-700 dark:text-gray-200";
+            resultsTitle.textContent = "Abrir con:";
+            resultsDiv.appendChild(resultsTitle);
+
+            links.forEach(link => {
+                const container = document.createElement('div');
+                container.className = 'flex items-center gap-2';
+                const a = document.createElement('a');
+                a.href = link.url;
+                
+                if (!link.url.startsWith('intent:')) {
+                    a.target = '_blank';
+                }
+                a.rel = 'noopener noreferrer';
+                a.className = `flex-grow flex items-center p-3 rounded-lg text-white font-semibold transition-all duration-300 transform hover:scale-105 shadow-md ${link.color}`;
+                a.innerHTML = `<span class="w-8 h-8">${fullIcons[link.name]}</span><span class="ml-3">${link.name}</span>`;
+                
+                // Add click listener to copy the link and show notification
+                a.addEventListener('click', () => {
+                    copyToClipboard(link.url);
+                });
+
+                const copyButton = document.createElement('button');
+                copyButton.title = 'Copiar enlace';
+                copyButton.className = 'flex-shrink-0 p-3 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors';
+                copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600 dark:text-gray-300"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+                copyButton.onclick = (e) => { e.preventDefault(); copyToClipboard(link.url); };
+                container.appendChild(a);
+                container.appendChild(copyButton);
+                resultsDiv.appendChild(container);
+            });
+        }
+        
+        function copyToClipboard(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showNotification();
+            } catch (err) { console.error('No se pudo copiar el texto: ', err); }
+            document.body.removeChild(ta);
+        }
+
+        function showNotification() {
+            notificationDiv.classList.remove('opacity-0', 'translate-y-10');
+            setTimeout(() => {
+                notificationDiv.classList.add('opacity-0', 'translate-y-10');
+            }, 2000);
+        }
+
+        function clearAll() {
+            googleMapsUrlInput.value = '';
+            coordsInput.value = '';
+            clearResults();
+        }
+        
+        function clearResults() {
+            resultsDiv.innerHTML = '';
+            hideError();
+        }
+
+        function showError(type, data = '') {
+            resultsDiv.innerHTML = '';
+            let msg = '';
+            switch (type) {
+                case 'short-url':
+                    msg = `<strong>¡Enlace corto detectado!</strong> No se puede procesar directamente.<br><br><strong>Solución:</strong><br>1. <a href="${data}" target="_blank" rel="noopener noreferrer" class="font-bold underline text-blue-600 dark:text-blue-400">Haz clic aquí para abrirlo</a>.<br>2. Copia la nueva URL (larga) de tu navegador.<br>3. Pégala aquí y convierte de nuevo.`;
+                    break;
+                case 'invalid-url':
+                    msg = '<strong>¡URL no válida!</strong> No pudimos encontrar coordenadas. Asegúrate de que sea un enlace de Google Maps. Si estás pegando coordenadas (ej: 17°S 63°W), por favor usa la pestaña "Desde Coordenadas".';
+                    break;
+                case 'invalid-coords':
+                    msg = '<strong>¡Coordenadas no válidas!</strong> Usa un formato como "40.71, -74.00" o "40°42\'46\\"N 74°00\'21\\"W".';
+                    break;
+            }
+            errorText.innerHTML = msg;
+            errorMessageDiv.classList.remove('hidden');
+        }
+
+        function hideError() {
+            errorMessageDiv.classList.add('hidden');
+        }
+    </script>
+
+</body>
+</html>
