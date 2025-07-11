@@ -9,19 +9,29 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Consistent light gray background */
         }
         #notification {
             transition: opacity 0.5s, transform 0.5s;
         }
-        /* Styles for active and inactive tabs */
+        /* New tab styles inspired by the image */
+        .tab {
+            background-color: #f3f4f6; /* light-gray */
+            color: #4b5563; /* gray-600 */
+            border-color: transparent;
+        }
+        .dark .tab {
+            background-color: #374151; /* gray-700 */
+            color: #d1d5db; /* gray-300 */
+        }
         .tab.active {
-            border-color: #3b82f6; /* blue-500 */
-            color: #3b82f6;
-            background-color: #eff6ff; /* blue-50 */
+            background-color: #e0e7ff; /* indigo-100 */
+            color: #4338ca; /* indigo-700 */
+            border-color: #4338ca;
         }
         .dark .tab.active {
-            background-color: #1e3a8a; /* blue-900 */
-            color: #dbeafe; /* blue-100 */
+            background-color: #3730a3; /* indigo-800 */
+            color: #e0e7ff; /* indigo-100 */
         }
         .tab-content {
             display: none;
@@ -31,43 +41,42 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 flex flex-col min-h-screen transition-colors duration-300">
+<body class="flex flex-col min-h-screen">
 
     <header class="bg-slate-900 p-4 shadow-md">
-        <div class="max-w-4xl mx-auto flex justify-center" bis_skin_checked="1">
+        <div class="max-w-4xl mx-auto flex justify-center">
             <img src="https://dcdn-us.mitiendanube.com/stores/004/546/736/themes/common/logo-660776128-1736645739-9bb5db1715d3b799cdf782b0f0815d541736645739.webp?0" alt="Logo ArelyShop" class="h-12" onerror="this.onerror=null; this.src='https://placehold.co/200x50/0f172a/ffffff?text=ArelyShop';">
         </div>
     </header>
 
     <main class="flex-grow flex items-center justify-center p-4">
-        <div class="w-full max-w-lg mx-auto p-6 sm:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl space-y-6 relative overflow-hidden">
+        <div class="w-full max-w-lg mx-auto p-6 sm:p-8 bg-white rounded-xl shadow-lg space-y-6 relative overflow-hidden">
             
-            <!-- Header -->
             <div class="text-center">
-                <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Conversor Universal de Mapas</h1>
-                <p class="text-gray-500 dark:text-gray-400 mt-2">Pega un enlace o introduce coordenadas para convertir.</p>
+                <h1 class="text-2xl font-bold text-gray-800">Conversor Universal de Mapas</h1>
+                <p class="text-gray-500 mt-2">Pega un enlace o introduce coordenadas para convertir.</p>
             </div>
 
             <!-- Tabs -->
-            <div class="flex border-b border-gray-200 dark:border-gray-700">
-                <button id="tab-url" class="tab active flex-1 py-2 px-4 text-center font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-blue-600 transition-colors">Desde URL</button>
-                <button id="tab-coords" class="tab flex-1 py-2 px-4 text-center font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-blue-600 transition-colors">Desde Coordenadas</button>
+            <div class="flex border-b border-gray-200">
+                <button id="tab-url" class="tab active flex-1 py-2 px-4 text-center font-medium border-b-2 transition-colors duration-200">Desde URL</button>
+                <button id="tab-coords" class="tab flex-1 py-2 px-4 text-center font-medium border-b-2 transition-colors duration-200">Desde Coordenadas</button>
             </div>
 
             <!-- Input Forms -->
             <div class="space-y-4">
                 <!-- URL Input -->
                 <div id="content-url" class="tab-content active">
-                    <label for="googleMapsUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Enlace de Google Maps</label>
-                    <input type="url" id="googleMapsUrl" placeholder="https://maps.app.goo.gl/..." class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200" autocomplete="off">
+                    <label for="googleMapsUrl" class="block text-sm font-medium text-gray-700 mb-1">Enlace de Google Maps</label>
+                    <input type="url" id="googleMapsUrl" placeholder="https://maps.app.goo.gl/..." class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <!-- Coordinates Input -->
                 <div id="content-coords" class="tab-content">
-                     <label for="coordsInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coordenadas (Decimal o GMS)</label>
-                    <input type="text" id="coordsInput" placeholder="Ej: 17°45'40.1&quot;S 63°10'13.1&quot;W" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200" autocomplete="off">
+                     <label for="coordsInput" class="block text-sm font-medium text-gray-700 mb-1">Coordenadas (Decimal o GMS)</label>
+                    <input type="text" id="coordsInput" placeholder="Ej: 17°45'40.1&quot;S 63°10'13.1&quot;W" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
-                <button id="convertBtn" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                <button id="convertBtn" class="w-full bg-blue-600 text-white font-semibold py-2.5 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-colors duration-200">
                     Convertir
                 </button>
             </div>
@@ -76,12 +85,12 @@
             <div id="results" class="pt-4 space-y-3"></div>
 
             <!-- Error Message Box -->
-            <div id="error-message" class="hidden p-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 rounded-lg">
+            <div id="error-message" class="hidden p-4 bg-red-100 text-red-700 rounded-md">
                 <p id="error-text"></p>
             </div>
 
             <!-- Notification for 'Copied' -->
-            <div id="notification" class="absolute bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transform translate-y-10">
+            <div id="notification" class="absolute bottom-5 right-5 bg-gray-800 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transform translate-y-10">
                 ¡Copiado!
             </div>
 
@@ -220,10 +229,10 @@
         function generateLinks(lat, lon) {
             clearResults();
             const links = [
-                { name: 'Waze', url: `https://waze.com/ul?ll=${lat},${lon}&navigate=yes`, color: 'bg-indigo-500 hover:bg-indigo-600' },
-                { name: 'Apple Maps', url: `http://maps.apple.com/?ll=${lat},${lon}&q=Ubicación`, color: 'bg-sky-500 hover:bg-sky-600' },
-                { name: 'OpenStreetMap', url: `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}&zoom=16`, color: 'bg-emerald-500 hover:bg-emerald-600' },
-                { name: 'Geo Link (Móvil)', url: `geo:${lat},${lon}`, color: 'bg-gray-500 hover:bg-gray-600' }
+                { name: 'Waze', url: `https://waze.com/ul?ll=${lat},${lon}&navigate=yes`, color: 'bg-indigo-500 hover:bg-indigo-600', iconColor: 'text-indigo-500' },
+                { name: 'Apple Maps', url: `http://maps.apple.com/?ll=${lat},${lon}&q=Ubicación`, color: 'bg-sky-500 hover:bg-sky-600', iconColor: 'text-sky-500' },
+                { name: 'OpenStreetMap', url: `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}&zoom=16`, color: 'bg-emerald-500 hover:bg-emerald-600', iconColor: 'text-emerald-500' },
+                { name: 'Geo Link (Móvil)', url: `geo:${lat},${lon}`, color: 'bg-gray-500 hover:bg-gray-600', iconColor: 'text-gray-500' }
             ];
 
             // Full SVG content
@@ -235,24 +244,23 @@
             };
 
             const resultsTitle = document.createElement('h3');
-            resultsTitle.className = "text-lg font-semibold text-gray-700 dark:text-gray-200";
+            resultsTitle.className = "text-lg font-semibold text-gray-700";
             resultsTitle.textContent = "Abrir con:";
             resultsDiv.appendChild(resultsTitle);
 
             links.forEach(link => {
                 const rowContainer = document.createElement('div');
-                rowContainer.className = 'flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50';
+                rowContainer.className = 'flex items-center justify-between p-2 rounded-lg bg-gray-50';
 
                 // Left side: Icon and Name
                 const nameContainer = document.createElement('div');
                 nameContainer.className = 'flex items-center gap-3';
                 const iconSpan = document.createElement('span');
                 iconSpan.innerHTML = fullIcons[link.name];
-                // Apply color to the icon's background for better visibility
-                iconSpan.className = `flex items-center justify-center w-10 h-10 text-white rounded-lg ${link.color}`;
+                iconSpan.className = `flex items-center justify-center w-8 h-8 ${link.iconColor}`;
                 const nameSpan = document.createElement('span');
                 nameSpan.textContent = link.name;
-                nameSpan.className = 'font-semibold text-gray-800 dark:text-gray-200';
+                nameSpan.className = 'font-medium text-gray-700';
                 nameContainer.appendChild(iconSpan);
                 nameContainer.appendChild(nameSpan);
 
@@ -267,18 +275,17 @@
                     goButton.target = '_blank';
                 }
                 goButton.rel = 'noopener noreferrer';
-                goButton.className = 'px-4 py-2 text-sm font-medium text-white rounded-lg shadow-sm transition-colors duration-200 ' + link.color;
+                goButton.className = 'px-4 py-1.5 text-sm font-semibold text-white rounded-md shadow-sm transition-colors duration-200 ' + link.color;
                 goButton.textContent = 'Ir';
                 goButton.addEventListener('click', (e) => {
-                    // We don't prevent default, we just copy as a bonus
                     copyToClipboard(link.url);
                 });
 
                 // "Copiar" (Copy) Button
                 const copyButton = document.createElement('button');
                 copyButton.title = 'Copiar enlace';
-                copyButton.className = 'p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors';
-                copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600 dark:text-gray-300"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+                copyButton.className = 'p-1.5 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors';
+                copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
                 copyButton.onclick = (e) => { e.preventDefault(); copyToClipboard(link.url); };
 
                 buttonsContainer.appendChild(goButton);
@@ -296,7 +303,7 @@
             ta.value = text;
             ta.style.position = 'fixed'; ta.style.opacity = '0';
             document.body.appendChild(ta);
-ta.select();
+            ta.select();
             try {
                 document.execCommand('copy');
                 showNotification();
@@ -327,7 +334,7 @@ ta.select();
             let msg = '';
             switch (type) {
                 case 'short-url':
-                    msg = `<strong>¡Enlace corto detectado!</strong> No se puede procesar directamente.<br><br><strong>Solución:</strong><br>1. <a href="${data}" target="_blank" rel="noopener noreferrer" class="font-bold underline text-blue-600 dark:text-blue-400">Haz clic aquí para abrirlo</a>.<br>2. Copia la nueva URL (larga) de tu navegador.<br>3. Pégala aquí y convierte de nuevo.`;
+                    msg = `<strong>¡Enlace corto detectado!</strong> No se puede procesar directamente.<br><br><strong>Solución:</strong><br>1. <a href="${data}" target="_blank" rel="noopener noreferrer" class="font-bold underline text-blue-500">Haz clic aquí para abrirlo</a>.<br>2. Copia la nueva URL (larga) de tu navegador.<br>3. Pégala aquí y convierte de nuevo.`;
                     break;
                 case 'invalid-url':
                     msg = '<strong>¡URL no válida!</strong> No pudimos encontrar coordenadas. Asegúrate de que sea un enlace de Google Maps. Si estás pegando coordenadas (ej: 17°S 63°W), por favor usa la pestaña "Desde Coordenadas".';
