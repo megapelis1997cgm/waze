@@ -31,54 +31,62 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen transition-colors duration-300 p-4">
+<body class="bg-gray-100 dark:bg-gray-900 flex flex-col min-h-screen transition-colors duration-300">
 
-    <div class="w-full max-w-lg mx-auto p-6 sm:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl space-y-6 relative overflow-hidden">
-        
-        <!-- Header -->
-        <div class="text-center">
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Conversor Universal de Mapas</h1>
-            <p class="text-gray-500 dark:text-gray-400 mt-2">Pega un enlace o introduce coordenadas para convertir.</p>
+    <header class="bg-slate-900 p-4 shadow-md">
+        <div class="max-w-4xl mx-auto flex justify-center" bis_skin_checked="1">
+            <img src="https://dcdn-us.mitiendanube.com/stores/004/546/736/themes/common/logo-660776128-1736645739-9bb5db1715d3b799cdf782b0f0815d541736645739.webp?0" alt="Logo ArelyShop" class="h-12" onerror="this.onerror=null; this.src='https://placehold.co/200x50/0f172a/ffffff?text=ArelyShop';">
         </div>
+    </header>
 
-        <!-- Tabs -->
-        <div class="flex border-b border-gray-200 dark:border-gray-700">
-            <button id="tab-url" class="tab active flex-1 py-2 px-4 text-center font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-blue-600 transition-colors">Desde URL</button>
-            <button id="tab-coords" class="tab flex-1 py-2 px-4 text-center font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-blue-600 transition-colors">Desde Coordenadas</button>
-        </div>
-
-        <!-- Input Forms -->
-        <div class="space-y-4">
-            <!-- URL Input -->
-            <div id="content-url" class="tab-content active">
-                <label for="googleMapsUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Enlace de Google Maps</label>
-                <input type="url" id="googleMapsUrl" placeholder="https://maps.app.goo.gl/..." class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200" autocomplete="off">
-            </div>
-            <!-- Coordinates Input -->
-            <div id="content-coords" class="tab-content">
-                 <label for="coordsInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coordenadas (Decimal o GMS)</label>
-                <input type="text" id="coordsInput" placeholder="Ej: 17°45'40.1&quot;S 63°10'13.1&quot;W" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200" autocomplete="off">
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-lg mx-auto p-6 sm:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl space-y-6 relative overflow-hidden">
+            
+            <!-- Header -->
+            <div class="text-center">
+                <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Conversor Universal de Mapas</h1>
+                <p class="text-gray-500 dark:text-gray-400 mt-2">Pega un enlace o introduce coordenadas para convertir.</p>
             </div>
 
-            <button id="convertBtn" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                Convertir
-            </button>
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200 dark:border-gray-700">
+                <button id="tab-url" class="tab active flex-1 py-2 px-4 text-center font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-blue-600 transition-colors">Desde URL</button>
+                <button id="tab-coords" class="tab flex-1 py-2 px-4 text-center font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-blue-600 transition-colors">Desde Coordenadas</button>
+            </div>
+
+            <!-- Input Forms -->
+            <div class="space-y-4">
+                <!-- URL Input -->
+                <div id="content-url" class="tab-content active">
+                    <label for="googleMapsUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Enlace de Google Maps</label>
+                    <input type="url" id="googleMapsUrl" placeholder="https://maps.app.goo.gl/..." class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200" autocomplete="off">
+                </div>
+                <!-- Coordinates Input -->
+                <div id="content-coords" class="tab-content">
+                     <label for="coordsInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coordenadas (Decimal o GMS)</label>
+                    <input type="text" id="coordsInput" placeholder="Ej: 17°45'40.1&quot;S 63°10'13.1&quot;W" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200" autocomplete="off">
+                </div>
+
+                <button id="convertBtn" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    Convertir
+                </button>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results" class="pt-4 space-y-3"></div>
+
+            <!-- Error Message Box -->
+            <div id="error-message" class="hidden p-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 rounded-lg">
+                <p id="error-text"></p>
+            </div>
+
+            <!-- Notification for 'Copied' -->
+            <div id="notification" class="absolute bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transform translate-y-10">
+                ¡Copiado!
+            </div>
+
         </div>
-
-        <!-- Results Section -->
-        <div id="results" class="pt-4 space-y-3"></div>
-
-        <!-- Error Message Box -->
-        <div id="error-message" class="hidden p-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 rounded-lg">
-            <p id="error-text"></p>
-        </div>
-
-        <!-- Notification for 'Copied' -->
-        <div id="notification" class="absolute bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transform translate-y-10">
-            ¡Copiado!
-        </div>
-
-    </div>
+    </main>
 
     <script>
         // --- DOM Elements ---
