@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Punto de Venta Arelyshop</title>
+    <link rel="icon" href="https://www.svgrepo.com/show/373594/favicon.svg" type="image/svg+xml">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- jsPDF and html2canvas for PDF generation -->
@@ -189,8 +190,9 @@
                             </div>
                         </div>
                         <div class="text-left sm:text-right mt-4 sm:mt-0">
-                            <p class="text-lg font-semibold">Nota de Venta</p>
-                            <p class="text-sm text-slate-300"><strong>Nr:</strong> <span id="saleNumber">...</span></p>
+                            <p class="text-lg font-semibold" id="receiptTitle">Nota de Venta</p>
+                            <p id="saleNumberLine" class="text-sm text-slate-300"><strong>Nr:</strong> <span id="saleNumber">...</span></p>
+                            <p id="quoteValidityLine" class="text-sm text-slate-300" style="display: none;"><strong>Validez:</strong> 24 horas</p>
                             <p class="text-sm text-slate-300"><strong>Fecha:</strong> <span id="currentDate"></span></p>
                         </div>
                     </div>
@@ -259,13 +261,28 @@
                     </div>
                 </div>
 
-                <!-- Action Button -->
-                <div class="text-center mt-8">
-                    <button id="downloadPdfBtn" class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition duration-200 shadow-lg flex items-center justify-center mx-auto">
+                <!-- Action Buttons -->
+                <div class="text-center mt-8 space-y-4 md:space-y-0 md:space-x-4 md:flex md:justify-center">
+                    <button id="downloadQuoteBtn" class="w-full md:w-auto px-8 py-3 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition duration-200 shadow-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Descargar Cotización (PDF)
+                    </button>
+                    <button id="downloadPdfBtn" class="w-full md:w-auto px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition duration-200 shadow-lg flex items-center justify-center">
                         <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Descargar PDF
+                        Generar Venta y Descargar PDF
                     </button>
                 </div>
+
+                <!-- QR Section -->
+                <div id="qr-section" class="mt-8 flex justify-center">
+                    <div class="bg-white rounded-lg shadow-md p-6 text-center w-[800px] h-[800px] max-w-[90vw] max-h-[90vw] flex flex-col justify-center items-center">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex-shrink-0">Escanea y paga</h3>
+                        <div class="w-full h-full flex-grow">
+                            <img src="https://lh3.googleusercontent.com/d/12I70V-iLavoALoXZW9OyeI2zSXKXQcKb=w800?authuser=0" alt="Código QR para pago" class="w-full h-full object-contain" crossorigin="anonymous" onerror="this.onerror=null; this.src='https://placehold.co/700x700/ffffff/000000?text=QR+Error';">
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>
@@ -302,8 +319,12 @@
             const subtotalEl = document.getElementById('subtotal');
             const grandTotalEl = document.getElementById('grandTotal');
             const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+            const downloadQuoteBtn = document.getElementById('downloadQuoteBtn');
             const receiptEl = document.getElementById('receipt');
             const saleNumberEl = document.getElementById('saleNumber');
+            const receiptTitleEl = document.getElementById('receiptTitle');
+            const saleNumberLine = document.getElementById('saleNumberLine');
+            const quoteValidityLine = document.getElementById('quoteValidityLine');
             const loadProductsBtn = document.getElementById('loadProductsBtn');
             const googleSheetUrlInput = document.getElementById('googleSheetUrl');
             const loadingStatusEl = document.getElementById('loadingStatus');
@@ -474,7 +495,7 @@
                     
                     saleNumberEl.textContent = '...';
                     isReprintMode = false;
-                    downloadPdfBtn.innerHTML = '<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Descargar PDF y Guardar Venta';
+                    downloadPdfBtn.innerHTML = '<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Generar Venta y Descargar PDF';
 
                     try {
                         const response = await fetch(apiUrl);
@@ -598,6 +619,11 @@
                             row.querySelector('.product-name').value = selectedProduct.name;
                             row.querySelector('.sku').value = selectedProduct.sku;
                             row.querySelector('.unit-cost').value = selectedProduct.price;
+                            
+                            // Automatically add a new row if the current one is the last one
+                            if (row === productRowsContainer.lastElementChild) {
+                                addRow();
+                            }
                         }
                     }
                     
@@ -615,10 +641,20 @@
 
                 addProductBtn.addEventListener('click', addRow);
 
-                downloadPdfBtn.addEventListener('click', () => {
+                function generatePdf({ isQuote = false, isReprint = false }) {
                     const clientName = document.getElementById('clientName').value || 'sin-nombre';
                     const currentSaleNumber = saleNumberEl.textContent;
-                    const fileName = `Nota_Venta_${currentSaleNumber}_${clientName.replace(/ /g, '_')}.pdf`;
+                    
+                    const docType = isQuote ? 'Cotizacion' : 'Nota_Venta';
+                    const fileName = `${docType}_${currentSaleNumber}_${clientName.replace(/ /g, '_')}.pdf`;
+
+                    // Prepare receipt for canvas capture
+                    const originalTitle = receiptTitleEl.textContent;
+                    receiptTitleEl.textContent = isQuote ? 'Cotización' : 'Nota de Venta';
+                    if (isQuote) {
+                        saleNumberLine.style.display = 'none';
+                        quoteValidityLine.style.display = 'block';
+                    }
 
                     const saleItems = [];
                     const rows = productRowsContainer.querySelectorAll('tr');
@@ -634,14 +670,7 @@
 
                         if (productName && quantity > 0) {
                             saleItems.push({
-                                productName: productName,
-                                sku: sku,
-                                quantity: quantity,
-                                unitCost: unitCost,
-                                discount: discount,
-                                total: total,
-                                grossTotal: grossTotal,
-                                discountAmount: discountAmount
+                                productName, sku, quantity, unitCost, discount, total, grossTotal, discountAmount
                             });
                         }
                     });
@@ -671,17 +700,10 @@
                         input.parentNode.insertBefore(span, input.nextSibling);
                     });
 
-                    html2canvas(receiptEl, { 
-                        scale: 2,
-                        useCORS: true
-                    }).then(canvas => {
+                    html2canvas(receiptEl, { scale: 2, useCORS: true }).then(canvas => {
                         const { jsPDF } = window.jspdf;
                         const imgData = canvas.toDataURL('image/jpeg', 0.8);
-                        const pdf = new jsPDF({
-                            orientation: 'p',
-                            unit: 'mm',
-                            format: 'letter'
-                        });
+                        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'letter' });
                         
                         const margin = 10;
                         const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -691,22 +713,33 @@
                         pdf.addImage(imgData, 'JPEG', margin, margin, contentWidth, imgHeight);
                         pdf.save(fileName);
                         
-                        if (!isReprintMode) {
+                        // Only save the sale if it's NOT a quote and NOT a reprint
+                        if (!isQuote && !isReprint) {
                             saveSale(saleData).then(() => {
-                                fetchAndSetSaleNumber();
+                                fetchAndSetSaleNumber(); // Get the next sale number
                             });
                         }
 
                     }).catch(err => {
                         console.error("Error generating PDF:", err);
                     }).finally(() => {
+                        // Cleanup: Restore the original state of the receipt
                         receiptEl.style.width = originalWidth;
                         actionCols.forEach(col => col.style.display = '');
                         addProductBtn.style.display = '';
                         document.querySelectorAll('.pdf-text-replacement').forEach(span => span.remove());
                         inputs.forEach(input => input.style.display = '');
+                        receiptTitleEl.textContent = originalTitle; // Restore title
+                        if (isQuote) {
+                            saleNumberLine.style.display = '';
+                            quoteValidityLine.style.display = 'none';
+                        }
                     });
-                });
+                }
+
+                downloadQuoteBtn.addEventListener('click', () => generatePdf({ isQuote: true }));
+                downloadPdfBtn.addEventListener('click', () => generatePdf({ isReprint: isReprintMode }));
+
 
                 generateReportBtn.addEventListener('click', async () => {
                     const startDate = document.getElementById('startDate').value;
