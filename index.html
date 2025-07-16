@@ -57,10 +57,6 @@
         #configSection.open {
             max-height: 500px; /* Adjust as needed */
         }
-        /* Image Preview Modal Styles */
-        #imagePreviewModal {
-            transition: opacity 0.3s ease;
-        }
     </style>
 </head>
 <body class="bg-f0f2f5">
@@ -288,15 +284,6 @@
         </div>
     </div>
 
-    <!-- Image Preview Modal -->
-    <div id="imagePreviewModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden p-4">
-        <div class="relative bg-white p-4 rounded-lg shadow-xl max-w-lg w-full">
-            <button id="closeImagePreview" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-2xl font-bold text-gray-700 hover:text-red-500">&times;</button>
-            <img id="productPreviewImage" src="" alt="Vista Previa del Producto" class="w-full h-auto object-contain max-h-[80vh] rounded"
-                 onerror="this.onerror=null; this.src='https://placehold.co/400x400/eeeeee/cccccc?text=Sin+Imagen';">
-        </div>
-    </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // --- LOGIN ELEMENTS ---
@@ -339,9 +326,6 @@
             const closeReportModal = document.getElementById('closeReportModal');
             const downloadReportBtn = document.getElementById('downloadReportBtn');
             const reportTitle = document.getElementById('reportTitle');
-            const imagePreviewModal = document.getElementById('imagePreviewModal');
-            const productPreviewImage = document.getElementById('productPreviewImage');
-            const closeImagePreview = document.getElementById('closeImagePreview');
             
             let saleCounter = 1;
             let productsData = [];
@@ -414,14 +398,13 @@
                         
                         const rows = csvText.split('\n').slice(1);
                         productsData = rows.map(row => {
-                            const columns = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
-                            if (columns.length >= 7 && columns[0] && columns[1]) {
+                            const columns = row.split(',');
+                            if (columns.length >= 5 && columns[0] && columns[1]) {
                                 return {
                                     name: columns[0].trim().replace(/"/g, ''),
                                     price: parseFloat(columns[1].trim()) || 0,
                                     cost: parseFloat(columns[2].trim()) || 0,
-                                    sku: columns[4] ? columns[4].trim().replace(/"/g, '') : '',
-                                    imageUrl: columns[6] ? columns[6].trim().replace(/"/g, '') : ''
+                                    sku: columns[4] ? columns[4].trim().replace(/"/g, '') : ''
                                 };
                             }
                             return null;
@@ -615,10 +598,6 @@
                             row.querySelector('.product-name').value = selectedProduct.name;
                             row.querySelector('.sku').value = selectedProduct.sku;
                             row.querySelector('.unit-cost').value = selectedProduct.price;
-                            if(selectedProduct.imageUrl) {
-                                productPreviewImage.src = selectedProduct.imageUrl;
-                                imagePreviewModal.classList.remove('hidden');
-                            }
                         }
                     }
                     
@@ -871,18 +850,6 @@
                 }
 
                 newSaleBtn.addEventListener('click', resetForNewSale);
-
-                // --- IMAGE PREVIEW MODAL ---
-                function hideImagePreview() {
-                    imagePreviewModal.classList.add('hidden');
-                }
-                closeImagePreview.addEventListener('click', hideImagePreview);
-                imagePreviewModal.addEventListener('click', (e) => {
-                    if (e.target === imagePreviewModal) {
-                        hideImagePreview();
-                    }
-                });
-
 
                 // --- INITIALIZE APP ---
                 fetchAndSetSaleNumber();
