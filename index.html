@@ -3,415 +3,893 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convertidor de Enlaces y Coordenadas de Mapas</title>
+    <title>Punto de Venta Arelyshop</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- jsPDF and html2canvas for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        /* Custom styles for the Inter font and general layout */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Consistent light gray background */
+            background-color: #f0f2f5;
         }
-        #notification {
-            transition: opacity 0.5s, transform 0.5s;
+        #receipt {
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
-        /* New tab styles inspired by the image */
-        .tab {
-            background-color: #f3f4f6; /* light-gray */
-            color: #4b5563; /* gray-600 */
-            border-color: transparent;
+        /* Ensure input fields in the table are responsive */
+        .product-table input {
+            width: 100%;
+            min-width: 60px; /* Minimum width to prevent collapsing */
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
         }
-        .dark .tab {
-            background-color: #374151; /* gray-700 */
-            color: #d1d5db; /* gray-300 */
+        /* Style for the delete button in the table */
+        .delete-row-btn {
+            color: #ef4444; /* Red color */
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 0.5rem;
         }
-        .tab.active {
-            background-color: #e0e7ff; /* indigo-100 */
-            color: #4338ca; /* indigo-700 */
-            border-color: #4338ca;
+        .delete-row-btn:hover {
+            color: #b91c1c; /* Darker red on hover */
         }
-        .dark .tab.active {
-            background-color: #3730a3; /* indigo-800 */
-            color: #e0e7ff; /* indigo-100 */
+        /* Class to replace inputs for PDF */
+        .pdf-text-replacement {
+            padding: 0.5rem;
+            display: inline-block;
+            min-height: 2.5rem; /* Match input height */
+            vertical-align: middle;
         }
-        .tab-content {
-            display: none;
+        /* Transition for the collapsible section */
+        #configSection {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
         }
-        .tab-content.active {
-            display: block;
+        #configSection.open {
+            max-height: 500px; /* Adjust as needed */
         }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* Image Preview Modal Styles */
+        #imagePreviewModal {
+            transition: opacity 0.3s ease;
         }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
-
-    <header class="bg-slate-900 p-4 shadow-md">
-        <div class="max-w-4xl mx-auto flex justify-center">
-            <img src="https://dcdn-us.mitiendanube.com/stores/004/546/736/themes/common/logo-660776128-1736645739-9bb5db1715d3b799cdf782b0f0815d541736645739.webp?0" alt="Logo ArelyShop" class="h-12" onerror="this.onerror=null; this.src='https://placehold.co/200x50/0f172a/ffffff?text=ArelyShop';">
-        </div>
-    </header>
-
-    <main class="flex-grow flex items-center justify-center p-4">
-        <div class="w-full max-w-lg mx-auto p-6 sm:p-8 bg-white rounded-xl shadow-lg space-y-6 relative overflow-hidden">
-            
-            <div class="text-center">
-                <h1 class="text-2xl font-bold text-gray-800">Conversor Universal de Mapas</h1>
-                <p class="text-gray-500 mt-2">Busca un lugar, pega un enlace o introduce coordenadas para convertir.</p>
+<body class="bg-f0f2f5">
+    <!-- Login Screen -->
+    <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
+        <div class="w-full max-w-sm p-8 bg-white rounded-2xl shadow-xl">
+            <div class="text-center mb-6">
+                <div class="bg-slate-900 rounded-lg p-4 inline-block mb-4">
+                    <img src="https://dcdn-us.mitiendanube.com/stores/004/546/736/themes/common/logo-660776128-1736645739-9bb5db1715d3b799cdf782b0f0815d541736645739.webp?0" 
+                         alt="Logo ArelyShop" 
+                         class="h-12"
+                         onerror="this.onerror=null; this.src='https://placehold.co/200x50/0f172a/ffffff?text=ArelyShop';">
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Iniciar Sesión</h1>
             </div>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label for="username" class="block text-sm font-medium text-gray-600 mb-1">Usuario</label>
+                    <input type="text" id="username" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-600 mb-1">Contraseña</label>
+                    <input type="password" id="password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-200">
+                    Ingresar
+                </button>
+                <p id="login-error" class="text-sm text-red-500 text-center mt-4"></p>
+            </form>
+        </div>
+    </div>
 
-            <!-- Search Bar -->
-            <div class="space-y-2">
-                <label for="searchInput" class="block text-sm font-medium text-gray-700">Buscar un Lugar</label>
-                <div class="flex gap-2">
-                    <input type="text" id="searchInput" placeholder="Ej: Plaza 24 de Septiembre, Santa Cruz" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <button id="searchBtn" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-colors duration-200 flex items-center justify-center w-24">
-                        <span class="search-text">Buscar</span>
-                        <div class="loader hidden"></div>
+    <!-- Main App Content (Initially Hidden) -->
+    <div id="app-content" style="display: none;">
+        <!-- Header with Logo -->
+        <header class="bg-slate-900 p-4 shadow-md">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <img src="https://dcdn-us.mitiendanube.com/stores/004/546/736/themes/common/logo-660776128-1736645739-9bb5db1715d3b799cdf782b0f0815d541736645739.webp?0" 
+                     alt="Logo ArelyShop" 
+                     class="h-12"
+                     onerror="this.onerror=null; this.src='https://placehold.co/200x50/0f172a/ffffff?text=ArelyShop';">
+                <div class="text-white text-right">
+                    <p class="text-sm">Usuario: <span id="loggedInUserDisplay"></span></p>
+                </div>
+            </div>
+        </header>
+
+        <main class="p-4 md:p-8">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">
+                    Punto de Venta Arelyshop
+                </h1>
+
+                <!-- Toggle Button for Google Sheets Config (Admin only) -->
+                <div id="config-toggle-container" class="mb-4" style="display: none;">
+                    <button id="toggleConfigBtn" class="w-full flex justify-center items-center px-5 py-3 bg-white text-gray-700 font-semibold rounded-lg shadow-md hover:bg-gray-50 transition duration-200">
+                        <span>Configuración de Google Sheets</span>
+                        <svg id="arrowIcon" class="w-5 h-5 ml-2 transition-transform transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                </div>
+
+                <!-- Google Sheets Integration Section (Collapsible) -->
+                <div id="configSection">
+                    <div class="bg-white p-6 rounded-lg shadow-md mb-8 space-y-4">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-800 mb-3">1. Cargar Productos desde Google Sheets</h2>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="url" id="googleSheetUrl" placeholder="Pega aquí el enlace .csv de tus productos" class="flex-grow p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vTwnLFgBw30tyAFXc2olw5LLnqQdaxMRiZSpSndWSWhslTkqATarBs8dLImUhcXLK8EmBEs7gUL10oK/pub?output=csv">
+                                <button id="loadProductsBtn" class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">Cargar Productos</button>
+                            </div>
+                            <p id="loadingStatus" class="text-sm text-gray-500 mt-2"></p>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-800 mb-3">2. Guardar Ventas en Google Sheets</h2>
+                            <p class="text-sm text-gray-600 mb-2">URL de tu aplicación web para guardar el historial de ventas.</p>
+                            <input type="url" id="salesApiUrl" placeholder="Pega aquí la URL de tu aplicación web" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" value="https://script.google.com/macros/s/AKfycbw6ys16kj9oFqaxtY8QbrQ8FYHipPZ8ixTEDauvHTOE0kLBCsMxBTbutKo3mEL0sDA/exec">
+                            <p id="savingStatus" class="text-sm text-gray-500 mt-2"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions Section -->
+                <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                        <!-- New Sale -->
+                        <div class="md:col-span-1">
+                            <h2 class="text-lg font-semibold text-gray-800 mb-3">Nueva Venta</h2>
+                            <button id="newSaleBtn" class="w-full px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M4 12a8 8 0 018-8v0a8 8 0 018 8v0a8 8 0 01-8 8v0a8 8 0 01-8-8v0z"></path></svg>
+                                Limpiar y Empezar
+                            </button>
+                        </div>
+                        <!-- Search -->
+                        <div class="md:col-span-2">
+                            <h2 class="text-lg font-semibold text-gray-800 mb-3">Reimprimir Nota de Venta</h2>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="number" id="searchSaleInput" placeholder="Introduce el Nr. de Venta" class="flex-grow p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <button id="searchSaleBtn" class="px-5 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-200">Buscar</button>
+                            </div>
+                            <p id="searchStatus" class="text-sm text-gray-500 mt-2"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Section (Admin only) -->
+                <div id="report-section-container" style="display: none;" class="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-3">Generar Reporte de Ventas</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="startDate" class="block text-xs font-medium text-gray-700">Fecha de Inicio</label>
+                            <input type="date" id="startDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                        <div>
+                            <label for="endDate" class="block text-xs font-medium text-gray-700">Fecha de Fin</label>
+                            <input type="date" id="endDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                    </div>
+                    <button id="generateReportBtn" class="mt-4 w-full px-5 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition duration-200">Generar Reporte</button>
+                </div>
+                
+                <!-- Receipt Container -->
+                <div id="receipt" class="bg-white rounded-lg overflow-hidden">
+                    <!-- Receipt Header -->
+                    <div id="receiptHeader" class="bg-slate-900 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 gap-4">
+                        <div class="flex items-center">
+                            <img id="receiptLogo" src="https://dcdn-us.mitiendanube.com/stores/004/546/736/themes/common/logo-660776128-1736645739-9bb5db1715d3b799cdf782b0f0815d541736645739.webp?0" alt="Logo" class="h-10 mr-4" crossorigin="anonymous" onerror="this.onerror=null; this.src='https://placehold.co/100x40/ffffff/000000?text=Logo';">
+                            <div>
+                                <h2 class="text-xl font-bold">ArelyShop</h2>
+                                <p class="text-sm text-slate-300">Santa Cruz de la Sierra, Bolivia</p>
+                            </div>
+                        </div>
+                        <div class="text-left sm:text-right mt-4 sm:mt-0">
+                            <p class="text-lg font-semibold">Nota de Venta</p>
+                            <p class="text-sm text-slate-300"><strong>Nr:</strong> <span id="saleNumber">...</span></p>
+                            <p class="text-sm text-slate-300"><strong>Fecha:</strong> <span id="currentDate"></span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <!-- Customer Info -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div>
+                                <label for="clientName" class="block text-sm font-medium text-gray-700">Nombre del Cliente:</label>
+                                <input type="text" id="clientName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+                            </div>
+                            <div>
+                                <label for="clientPhone" class="block text-sm font-medium text-gray-700">Teléfono:</label>
+                                <input type="text" id="clientPhone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+                            </div>
+                            <div>
+                                <label for="clientNit" class="block text-sm font-medium text-gray-700">NIT o CI:</label>
+                                <input type="text" id="clientNit" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+                            </div>
+                        </div>
+
+                        <!-- Products Table -->
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 product-table">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cant.</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">Producto</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo Unit.</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Desc. (%)</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider action-col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="product-rows" class="bg-white divide-y divide-gray-200">
+                                    <!-- Product rows will be inserted here by JavaScript -->
+                                </tbody>
+                            </table>
+                            <datalist id="productList"></datalist>
+                        </div>
+                        <button id="addProductBtn" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 text-sm">+ Añadir Producto</button>
+
+                        <!-- Totals Section -->
+                        <div class="flex justify-end mt-6">
+                            <div class="w-full max-w-xs">
+                                <div class="flex justify-between text-gray-700">
+                                    <span>Subtotal:</span>
+                                    <span id="subtotal">Bs. 0.00</span>
+                                </div>
+                                <div class="flex justify-between font-bold text-xl text-gray-900 mt-2 pt-2 border-t">
+                                    <span>MONTO TOTAL:</span>
+                                    <span id="grandTotal">Bs. 0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="text-center border-t mt-8 pt-4">
+                            <p class="text-gray-700 font-semibold">¡Gracias por su compra!</p>
+                            <p class="text-sm text-gray-500">
+                                Visita nuestra tienda online: 
+                                <a href="https://arelyshopbo.mitiendanube.com/productos/" target="_blank" class="text-blue-600 hover:underline">arelyshopbo.mitiendanube.com</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="text-center mt-8">
+                    <button id="downloadPdfBtn" class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition duration-200 shadow-lg flex items-center justify-center mx-auto">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Descargar PDF
                     </button>
                 </div>
             </div>
+        </main>
+    </div>
 
-            <div class="relative flex py-2 items-center">
-                <div class="flex-grow border-t border-gray-200"></div>
-                <span class="flex-shrink mx-4 text-gray-400 text-sm">O usa</span>
-                <div class="flex-grow border-t border-gray-200"></div>
+    <!-- Report Modal -->
+    <div id="reportModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+            <h2 id="reportTitle" class="text-2xl font-bold mb-4 text-center">Reporte de Ventas</h2>
+            <div id="reportContent" class="overflow-y-auto">
+                <!-- Report table will be generated here -->
             </div>
-
-
-            <!-- Tabs -->
-            <div class="flex border-b border-gray-200">
-                <button id="tab-url" class="tab active flex-1 py-2 px-4 text-center font-medium border-b-2 transition-colors duration-200">Desde URL</button>
-                <button id="tab-coords" class="tab flex-1 py-2 px-4 text-center font-medium border-b-2 transition-colors duration-200">Desde Coordenadas</button>
+            <div class="text-center mt-6 flex justify-center gap-4">
+                <button id="downloadReportBtn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Descargar Reporte PDF</button>
+                <button id="closeReportModal" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Cerrar</button>
             </div>
-
-            <!-- Input Forms -->
-            <div class="space-y-4">
-                <!-- URL Input -->
-                <div id="content-url" class="tab-content active">
-                    <label for="googleMapsUrl" class="block text-sm font-medium text-gray-700 mb-1">Enlace de Google Maps</label>
-                    <input type="url" id="googleMapsUrl" placeholder="https://maps.app.goo.gl/..." class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <!-- Coordinates Input -->
-                <div id="content-coords" class="tab-content">
-                     <label for="coordsInput" class="block text-sm font-medium text-gray-700 mb-1">Coordenadas (Decimal o GMS)</label>
-                    <input type="text" id="coordsInput" placeholder="Ej: 17°45'40.1&quot;S 63°10'13.1&quot;W" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-
-                <button id="convertBtn" class="w-full bg-gray-600 text-white font-semibold py-2.5 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-colors duration-200">
-                    Convertir desde Pestaña
-                </button>
-            </div>
-
-            <!-- Results Section -->
-            <div id="results" class="pt-4 space-y-3"></div>
-
-            <!-- Error Message Box -->
-            <div id="error-message" class="hidden p-4 bg-red-100 text-red-700 rounded-md">
-                <p id="error-text"></p>
-            </div>
-
-            <!-- Notification for 'Copied' -->
-            <div id="notification" class="absolute bottom-5 right-5 bg-gray-800 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transform translate-y-10">
-                ¡Copiado!
-            </div>
-
         </div>
-    </main>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div id="imagePreviewModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden p-4">
+        <div class="relative bg-white p-4 rounded-lg shadow-xl max-w-lg w-full">
+            <button id="closeImagePreview" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-2xl font-bold text-gray-700 hover:text-red-500">&times;</button>
+            <img id="productPreviewImage" src="" alt="Vista Previa del Producto" class="w-full h-auto object-contain max-h-[80vh] rounded"
+                 onerror="this.onerror=null; this.src='https://placehold.co/400x400/eeeeee/cccccc?text=Sin+Imagen';">
+        </div>
+    </div>
 
     <script>
-        // --- DOM Elements ---
-        const searchInput = document.getElementById('searchInput');
-        const searchBtn = document.getElementById('searchBtn');
-        const searchBtnText = document.querySelector('.search-text');
-        const searchLoader = document.querySelector('.loader');
-        const convertBtn = document.getElementById('convertBtn');
-        const googleMapsUrlInput = document.getElementById('googleMapsUrl');
-        const coordsInput = document.getElementById('coordsInput');
-        const resultsDiv = document.getElementById('results');
-        const errorMessageDiv = document.getElementById('error-message');
-        const errorText = document.getElementById('error-text');
-        const notificationDiv = document.getElementById('notification');
-        const tabUrl = document.getElementById('tab-url');
-        const tabCoords = document.getElementById('tab-coords');
-        const contentUrl = document.getElementById('content-url');
-        const contentCoords = document.getElementById('content-coords');
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- LOGIN ELEMENTS ---
+            const loginScreen = document.getElementById('login-screen');
+            const appContent = document.getElementById('app-content');
+            const loginForm = document.getElementById('login-form');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const loginError = document.getElementById('login-error');
+            const credentialsUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRpJtN9t83wtntLMUkhBtLOPsSX-bWnHEZq4N3-hlTshJ--JXNRo3B-3XybUt4r1sHWMYsSttn5tp7u/pub?output=csv';
+            let loggedInUser = '';
 
-        let activeTab = 'url'; // 'url' or 'coords'
+            // --- APP ELEMENTS ---
+            const productRowsContainer = document.getElementById('product-rows');
+            const addProductBtn = document.getElementById('addProductBtn');
+            const subtotalEl = document.getElementById('subtotal');
+            const grandTotalEl = document.getElementById('grandTotal');
+            const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+            const receiptEl = document.getElementById('receipt');
+            const saleNumberEl = document.getElementById('saleNumber');
+            const loadProductsBtn = document.getElementById('loadProductsBtn');
+            const googleSheetUrlInput = document.getElementById('googleSheetUrl');
+            const loadingStatusEl = document.getElementById('loadingStatus');
+            const productListDatalist = document.getElementById('productList');
+            const salesApiUrlInput = document.getElementById('salesApiUrl');
+            const savingStatusEl = document.getElementById('savingStatus');
+            const toggleConfigBtn = document.getElementById('toggleConfigBtn');
+            const configSection = document.getElementById('configSection');
+            const arrowIcon = document.getElementById('arrowIcon');
+            const searchSaleInput = document.getElementById('searchSaleInput');
+            const searchSaleBtn = document.getElementById('searchSaleBtn');
+            const searchStatusEl = document.getElementById('searchStatus');
+            const newSaleBtn = document.getElementById('newSaleBtn');
+            const loggedInUserDisplay = document.getElementById('loggedInUserDisplay');
+            const configToggleContainer = document.getElementById('config-toggle-container');
+            const reportSectionContainer = document.getElementById('report-section-container');
+            const generateReportBtn = document.getElementById('generateReportBtn');
+            const reportModal = document.getElementById('reportModal');
+            const reportContent = document.getElementById('reportContent');
+            const closeReportModal = document.getElementById('closeReportModal');
+            const downloadReportBtn = document.getElementById('downloadReportBtn');
+            const reportTitle = document.getElementById('reportTitle');
+            const imagePreviewModal = document.getElementById('imagePreviewModal');
+            const productPreviewImage = document.getElementById('productPreviewImage');
+            const closeImagePreview = document.getElementById('closeImagePreview');
+            
+            let saleCounter = 1;
+            let productsData = [];
+            let isReprintMode = false;
 
-        // --- Event Listeners ---
-        searchBtn.addEventListener('click', handleLocationSearch);
-        searchInput.addEventListener('keypress', (e) => e.key === 'Enter' && handleLocationSearch());
-        convertBtn.addEventListener('click', handleTabConversion);
-        googleMapsUrlInput.addEventListener('keypress', (e) => e.key === 'Enter' && handleTabConversion());
-        coordsInput.addEventListener('keypress', (e) => e.key === 'Enter' && handleTabConversion());
-        
-        googleMapsUrlInput.addEventListener('input', clearResults);
-        coordsInput.addEventListener('input', clearResults);
-        searchInput.addEventListener('input', clearResults);
+            // --- LOGIN LOGIC ---
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                loginError.textContent = 'Verificando...';
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value.trim();
 
-        tabUrl.addEventListener('click', () => switchTab('url'));
-        tabCoords.addEventListener('click', () => switchTab('coords'));
+                try {
+                    const response = await fetch(credentialsUrl);
+                    if (!response.ok) throw new Error('No se pudo cargar la lista de usuarios.');
+                    const csvText = await response.text();
+                    const rows = csvText.split('\n').slice(1);
+                    const users = rows.map(row => {
+                        const columns = row.split(',');
+                        return { user: columns[0].trim(), pass: columns[1].trim() };
+                    });
 
-        /**
-         * Handles search from the top search bar using Nominatim API.
-         */
-        async function handleLocationSearch() {
-            const query = searchInput.value.trim();
-            if (!query) return;
+                    const foundUser = users.find(u => u.user === username && u.pass === password);
 
-            clearResults();
-            toggleSearchLoading(true);
-
-            try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    if (foundUser) {
+                        loggedInUser = foundUser.user;
+                        loginScreen.style.display = 'none';
+                        appContent.style.display = 'block';
+                        initializeApp();
+                    } else {
+                        loginError.textContent = 'Usuario o contraseña incorrectos.';
+                    }
+                } catch (error) {
+                    loginError.textContent = `Error de red: ${error.message}`;
                 }
-                const data = await response.json();
-
-                if (data && data.length > 0) {
-                    const { lat, lon } = data[0];
-                    generateLinks(lat, lon);
-                } else {
-                    showError('no-search-results');
-                }
-            } catch (error) {
-                console.error("Search failed:", error);
-                showError('search-failed');
-            } finally {
-                toggleSearchLoading(false);
-            }
-        }
-
-        /**
-         * Switches the active tab and content.
-         * @param {string} tabName - The name of the tab to switch to ('url' or 'coords').
-         */
-        function switchTab(tabName) {
-            activeTab = tabName;
-            clearAllInputs();
-            if (tabName === 'url') {
-                tabUrl.classList.add('active');
-                tabCoords.classList.remove('active');
-                contentUrl.classList.add('active');
-                contentCoords.classList.remove('active');
-            } else {
-                tabUrl.classList.remove('active');
-                tabCoords.classList.add('active');
-                contentUrl.classList.remove('active');
-                contentCoords.classList.add('active');
-            }
-        }
-
-        /**
-         * Main function to handle the link/coordinate conversion process from tabs.
-         */
-        function handleTabConversion() {
-            let coords = null;
-            if (activeTab === 'url') {
-                const url = googleMapsUrlInput.value.trim();
-                if (!url) { clearResults(); return; }
-                if (url.startsWith('https://maps.app.goo.gl')) {
-                    showError('short-url', url);
-                    return;
-                }
-                coords = extractCoordinatesFromUrl(url);
-                if (!coords) showError('invalid-url');
-
-            } else { // activeTab === 'coords'
-                const coordString = coordsInput.value.trim();
-                if (!coordString) { clearResults(); return; }
-                coords = parseCoordinates(coordString);
-                if (!coords) showError('invalid-coords');
-            }
-
-            if (coords) {
-                hideError();
-                generateLinks(coords.lat, coords.lon);
-            }
-        }
-
-        /**
-         * Parses a string to find coordinates, supporting Decimal and DMS formats.
-         * @param {string} str - The coordinate string.
-         * @returns {{lat: number, lon: number}|null}
-         */
-        function parseCoordinates(str) {
-            let match = str.match(/^(-?\d+\.?\d*)[, ]+(-?\d+\.?\d*)$/);
-            if (match) {
-                return { lat: parseFloat(match[1]), lon: parseFloat(match[2]) };
-            }
-            const dmsRegex = /(\d+)[°\s]+(\d+)[',\s]+([\d.]+)"?\s*([NS])[, ]+(\d+)[°\s]+(\d+)[',\s]+([\d.]+)"?\s*([WE])/i;
-            match = str.match(dmsRegex);
-            if (match) {
-                const [, latD, latM, latS, latDir, lonD, lonM, lonS, lonDir] = match;
-                let lat = parseFloat(latD) + (parseFloat(latM) / 60) + (parseFloat(latS) / 3600);
-                if (latDir.toUpperCase() === 'S') lat = -lat;
-                let lon = parseFloat(lonD) + (parseFloat(lonM) / 60) + (parseFloat(lonS) / 3600);
-                if (lonDir.toUpperCase() === 'W') lon = -lon;
-                return { lat, lon };
-            }
-            return null;
-        }
-
-        /**
-         * Extracts latitude and longitude from various Google Maps URL formats.
-         * @param {string} url - The Google Maps URL.
-         * @returns {{lat: number, lon: number}|null}
-         */
-        function extractCoordinatesFromUrl(url) {
-            const patterns = [ /@(-?\d+\.\d+),(-?\d+\.\d+)/, /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/, /ll=(-?\d+\.\d+),(-?\d+\.\d+)/, /search\/(-?\d+\.\d+),(-?\d+\.\d+)/, /query=(-?\d+\.\d*),(-?\d+\.\d*)/ ];
-            for (const pattern of patterns) {
-                const match = url.match(pattern);
-                if (match && match.length >= 3) {
-                    return { lat: parseFloat(match[1]), lon: parseFloat(match[2]) };
-                }
-            }
-            return null;
-        }
-
-        /**
-         * Generates and displays the map links with copy buttons.
-         * @param {number} lat - The latitude.
-         * @param {number} lon - The longitude.
-         */
-        function generateLinks(lat, lon) {
-            clearResults();
-            const links = [
-                { name: 'Waze', url: `https://waze.com/ul?ll=${lat},${lon}&navigate=yes`, color: 'bg-indigo-500 hover:bg-indigo-600', iconColor: 'text-indigo-500' },
-                { name: 'Apple Maps', url: `http://maps.apple.com/?ll=${lat},${lon}&q=Ubicación`, color: 'bg-sky-500 hover:bg-sky-600', iconColor: 'text-sky-500' },
-                { name: 'OpenStreetMap', url: `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}&zoom=16`, color: 'bg-emerald-500 hover:bg-emerald-600', iconColor: 'text-emerald-500' },
-                { name: 'Geo Link (Móvil)', url: `geo:${lat},${lon}`, color: 'bg-gray-500 hover:bg-gray-600', iconColor: 'text-gray-500' }
-            ];
-            const fullIcons = {
-                'Waze': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14.61 4.416c-1.936-.55-3.953-.42-5.783.33a.75.75 0 00-.33 1.05c.3.56.96.78 1.52.48 1.3-.36 2.68-.42 3.99-.12a.75.75 0 00.6-.94zm-10.22 6.54c.24-1.8 1.14-3.45 2.5-4.74a.75.75 0 00-1.05-1.05c-1.56 1.48-2.61 3.42-2.91 5.61a.75.75 0 00.75.87c.4-.03.72-.36.69-.75l-.03-.2a.75.75 0 00-.03-.2zm7.62 9.294c1.82.51 3.73.48 5.49-.09a.75.75 0 00.45-1.11c-.39-.52-1.08-.66-1.62-.33-1.29.33-2.61.39-3.87.12a.75.75 0 00-.69.99c.06.33.27.6.54.42zm-1.6-6.264a3 3 0 116 0 3 3 0 01-6 0zm-1.5-3a4.5 4.5 0 109 0 4.5 4.5 0 00-9 0z"></path></svg>`,
-                'Apple Maps': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12.01 2.011c-4.29 0-7.93 3.3-8.01 7.59v.01c0 4.3 3.71 7.83 8 7.83s8-3.54 8-7.83v-.01c-.07-4.29-3.71-7.59-7.99-7.59zm-4.3 7.59c0-2.37 1.93-4.3 4.3-4.3s4.3 1.93 4.3 4.3c0 2.36-1.93 4.3-4.3 4.3s-4.3-1.93-4.3-4.3zm10.3 5.43l-2.11 2.12c-.2.2-.45.29-.71.29s-.51-.1-.71-.29l-1.42-1.42-1.42 1.42c-.2.2-.45.29-.71.29s-.51-.1-.71-.29l-2.11-2.12c-1.31.76-2.29 2.04-2.29 3.54v.01c0 .06 0 .12.01.17h16.98c0-.06.01-.11.01-.17v-.01c0-1.5-1-2.78-2.29-3.54z"></path></svg>`,
-                'OpenStreetMap': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-4.418 0-8 3.582-8 8 0 4.419 8 14 8 14s8-9.581 8-14c0-4.418-3.582-8-8-8zm0 11.5c-1.933 0-3.5-1.567-3.5-3.5s1.567-3.5 3.5-3.5 3.5 1.567 3.5 3.5-1.567 3.5-3.5 3.5z"></path></svg>`,
-                'Geo Link (Móvil)': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path></svg>`
-            };
-
-            const resultsTitle = document.createElement('h3');
-            resultsTitle.className = "text-lg font-semibold text-gray-700";
-            resultsTitle.textContent = "Abrir con:";
-            resultsDiv.appendChild(resultsTitle);
-
-            links.forEach(link => {
-                const rowContainer = document.createElement('div');
-                rowContainer.className = 'flex items-center justify-between p-2 rounded-lg bg-gray-50';
-                const nameContainer = document.createElement('div');
-                nameContainer.className = 'flex items-center gap-3';
-                const iconSpan = document.createElement('span');
-                iconSpan.innerHTML = fullIcons[link.name];
-                iconSpan.className = `flex items-center justify-center w-8 h-8 ${link.iconColor}`;
-                const nameSpan = document.createElement('span');
-                nameSpan.textContent = link.name;
-                nameSpan.className = 'font-medium text-gray-700';
-                nameContainer.appendChild(iconSpan);
-                nameContainer.appendChild(nameSpan);
-                const buttonsContainer = document.createElement('div');
-                buttonsContainer.className = 'flex items-center gap-2';
-                const goButton = document.createElement('a');
-                goButton.href = link.url;
-                if (!link.url.startsWith('intent:')) { goButton.target = '_blank'; }
-                goButton.rel = 'noopener noreferrer';
-                goButton.className = 'px-4 py-1.5 text-sm font-semibold text-white rounded-md shadow-sm transition-colors duration-200 ' + link.color;
-                goButton.textContent = 'Ir';
-                goButton.addEventListener('click', (e) => { copyToClipboard(link.url); });
-                const copyButton = document.createElement('button');
-                copyButton.title = 'Copiar enlace';
-                copyButton.className = 'p-1.5 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors';
-                copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-                copyButton.onclick = (e) => { e.preventDefault(); copyToClipboard(link.url); };
-                buttonsContainer.appendChild(goButton);
-                buttonsContainer.appendChild(copyButton);
-                rowContainer.appendChild(nameContainer);
-                rowContainer.appendChild(buttonsContainer);
-                resultsDiv.appendChild(rowContainer);
             });
-        }
-        
-        function copyToClipboard(text) {
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            ta.style.position = 'fixed'; ta.style.opacity = '0';
-            document.body.appendChild(ta);
-            ta.select();
-            try {
-                document.execCommand('copy');
-                showNotification();
-            } catch (err) { console.error('No se pudo copiar el texto: ', err); }
-            document.body.removeChild(ta);
-        }
 
-        function showNotification() {
-            notificationDiv.classList.remove('opacity-0', 'translate-y-10');
-            setTimeout(() => {
-                notificationDiv.classList.add('opacity-0', 'translate-y-10');
-            }, 2000);
-        }
+            // --- MAIN APP INITIALIZATION ---
+            function initializeApp() {
+                loggedInUserDisplay.textContent = loggedInUser;
 
-        function clearAllInputs() {
-            googleMapsUrlInput.value = '';
-            coordsInput.value = '';
-            searchInput.value = '';
-            clearResults();
-        }
-        
-        function clearResults() {
-            resultsDiv.innerHTML = '';
-            hideError();
-        }
+                if (loggedInUser.toLowerCase() === 'admin') {
+                    configToggleContainer.style.display = 'block';
+                    reportSectionContainer.style.display = 'block';
+                } else {
+                    configToggleContainer.style.display = 'none';
+                    reportSectionContainer.style.display = 'none';
+                }
 
-        function toggleSearchLoading(isLoading) {
-            if (isLoading) {
-                searchBtnText.classList.add('hidden');
-                searchLoader.classList.remove('hidden');
-                searchBtn.disabled = true;
-            } else {
-                searchBtnText.classList.remove('hidden');
-                searchLoader.classList.add('hidden');
-                searchBtn.disabled = false;
+                toggleConfigBtn.addEventListener('click', () => {
+                    configSection.classList.toggle('open');
+                    arrowIcon.classList.toggle('rotate-180');
+                });
+
+                async function loadProducts() {
+                    const url = googleSheetUrlInput.value.trim();
+                    if (!url) {
+                        loadingStatusEl.textContent = 'Por favor, introduce un enlace válido.';
+                        loadingStatusEl.style.color = 'red';
+                        return;
+                    }
+
+                    loadingStatusEl.textContent = 'Cargando productos...';
+                    loadingStatusEl.style.color = 'gray';
+
+                    try {
+                        const response = await fetch(url);
+                        if (!response.ok) throw new Error('No se pudo cargar la hoja de cálculo.');
+                        const csvText = await response.text();
+                        
+                        const rows = csvText.split('\n').slice(1);
+                        productsData = rows.map(row => {
+                            const columns = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
+                            if (columns.length >= 7 && columns[0] && columns[1]) {
+                                return {
+                                    name: columns[0].trim().replace(/"/g, ''),
+                                    price: parseFloat(columns[1].trim()) || 0,
+                                    cost: parseFloat(columns[2].trim()) || 0,
+                                    sku: columns[4] ? columns[4].trim().replace(/"/g, '') : '',
+                                    imageUrl: columns[6] ? columns[6].trim().replace(/"/g, '') : ''
+                                };
+                            }
+                            return null;
+                        }).filter(p => p !== null);
+
+                        productListDatalist.innerHTML = '';
+                        productsData.forEach(product => {
+                            const nameOption = document.createElement('option');
+                            nameOption.value = product.name;
+                            productListDatalist.appendChild(nameOption);
+                            if (product.sku) {
+                                const skuOption = document.createElement('option');
+                                skuOption.value = product.sku;
+                                productListDatalist.appendChild(skuOption);
+                            }
+                        });
+
+                        loadingStatusEl.textContent = `¡${productsData.length} productos cargados exitosamente!`;
+                        loadingStatusEl.style.color = 'green';
+
+                    } catch (error) {
+                        console.error('Error loading products:', error);
+                        loadingStatusEl.textContent = `Error: ${error.message}`;
+                        loadingStatusEl.style.color = 'red';
+                    }
+                }
+
+                loadProductsBtn.addEventListener('click', loadProducts);
+
+                async function saveSale(saleData) {
+                    const apiUrl = salesApiUrlInput.value.trim();
+                    if (!apiUrl) {
+                        savingStatusEl.textContent = 'No se proporcionó URL para guardar la venta. Se omitió el guardado.';
+                        savingStatusEl.style.color = 'orange';
+                        return;
+                    }
+                    
+                    savingStatusEl.textContent = 'Guardando venta en Google Sheets...';
+                    savingStatusEl.style.color = 'gray';
+
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            cache: 'no-cache',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify(saleData),
+                            redirect: 'follow'
+                        });
+                        
+                        savingStatusEl.textContent = '¡Venta guardada exitosamente!';
+                        savingStatusEl.style.color = 'green';
+
+                    } catch (error) {
+                        console.error('Error saving sale:', error);
+                        savingStatusEl.textContent = `Error al guardar la venta: ${error.message}`;
+                        savingStatusEl.style.color = 'red';
+                    }
+                }
+
+                async function fetchAndSetSaleNumber() {
+                    const apiUrl = salesApiUrlInput.value.trim();
+                    if (!apiUrl) {
+                        saleNumberEl.textContent = 'URL no configurada';
+                        return;
+                    }
+                    
+                    saleNumberEl.textContent = '...';
+                    isReprintMode = false;
+                    downloadPdfBtn.innerHTML = '<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Descargar PDF y Guardar Venta';
+
+                    try {
+                        const response = await fetch(apiUrl);
+                        if (!response.ok) throw new Error('Respuesta de red no fue OK');
+                        const data = await response.json();
+
+                        if (data.result === 'success' && data.nextSaleNumber) {
+                            saleCounter = data.nextSaleNumber;
+                            saleNumberEl.textContent = saleCounter.toString().padStart(3, '0');
+                        } else {
+                            throw new Error(data.error || 'Respuesta inesperada del script.');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching sale number:', error);
+                        saleNumberEl.textContent = 'Error';
+                    }
+                }
+
+                searchSaleBtn.addEventListener('click', async () => {
+                    const saleNumberToSearch = searchSaleInput.value.trim();
+                    const apiUrl = salesApiUrlInput.value.trim();
+                    if (!saleNumberToSearch || !apiUrl) {
+                        searchStatusEl.textContent = 'Por favor, introduce un número de venta y configura la URL.';
+                        searchStatusEl.style.color = 'red';
+                        return;
+                    }
+
+                    searchStatusEl.textContent = `Buscando venta Nro. ${saleNumberToSearch}...`;
+                    searchStatusEl.style.color = 'gray';
+                    
+                    const searchUrl = `${apiUrl}?searchSaleNumber=${saleNumberToSearch}`;
+
+                    try {
+                        const response = await fetch(searchUrl);
+                        if (!response.ok) throw new Error('Error en la red al buscar.');
+                        const data = await response.json();
+
+                        if (data.result === 'success' && data.saleData) {
+                            populateReceiptWithData(data.saleData);
+                            searchStatusEl.textContent = `Venta ${saleNumberToSearch} cargada. Lista para reimprimir.`;
+                            searchStatusEl.style.color = 'green';
+                            isReprintMode = true;
+                            downloadPdfBtn.innerHTML = '<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg> Reimprimir PDF';
+                        } else {
+                            throw new Error(data.error || 'Venta no encontrada.');
+                        }
+                    } catch (error) {
+                        console.error('Error searching for sale:', error);
+                        searchStatusEl.textContent = `Error: ${error.message}`;
+                        searchStatusEl.style.color = 'red';
+                    }
+                });
+
+                function populateReceiptWithData(data) {
+                    document.getElementById('clientName').value = data.clientName;
+                    document.getElementById('clientPhone').value = data.clientPhone;
+                    document.getElementById('clientNit').value = data.clientNit;
+                    saleNumberEl.textContent = data.saleNumber.toString().padStart(3, '0');
+                    document.getElementById('currentDate').textContent = data.saleDate;
+
+                    productRowsContainer.innerHTML = '';
+                    data.items.forEach(item => {
+                        const row = addRow();
+                        row.querySelector('.quantity').value = item.quantity;
+                        row.querySelector('.product-name').value = item.productName;
+                        row.querySelector('.sku').value = item.sku || '';
+                        row.querySelector('.unit-cost').value = item.unitCost;
+                        row.querySelector('.discount').value = item.discount || 0;
+                    });
+                    updateTotals();
+                }
+
+                const today = new Date();
+                const saleDate = today.toLocaleDateString('es-BO');
+                document.getElementById('currentDate').textContent = saleDate;
+
+                const formatCurrency = (value) => {
+                    const numberValue = Number(value);
+                    if (isNaN(numberValue)) return 'Bs. 0.00';
+                    return `Bs. ${numberValue.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                };
+
+                const updateTotals = () => {
+                    let subtotal = 0;
+                    const rows = productRowsContainer.querySelectorAll('tr');
+                    rows.forEach(row => {
+                        const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+                        const unitCost = parseFloat(row.querySelector('.unit-cost').value) || 0;
+                        const discount = parseFloat(row.querySelector('.discount').value) || 0;
+
+                        const rowTotalValue = (quantity * unitCost) * (1 - discount / 100);
+                        row.querySelector('.row-total').textContent = formatCurrency(rowTotalValue);
+                        subtotal += rowTotalValue;
+                    });
+
+                    subtotalEl.textContent = formatCurrency(subtotal);
+                    grandTotalEl.textContent = formatCurrency(subtotal);
+                };
+
+                const addRow = () => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-2 py-2"><input type="number" class="quantity" value="1" min="1"></td>
+                        <td class="px-2 py-2"><input type="text" class="product-name" placeholder="Nombre o SKU" list="productList"></td>
+                        <td class="px-2 py-2"><input type="text" class="sku bg-gray-100" placeholder="SKU" readonly></td>
+                        <td class="px-2 py-2"><input type="number" class="unit-cost" placeholder="0.00" step="0.01"></td>
+                        <td class="px-2 py-2"><input type="number" class="discount" value="0" min="0" max="100"></td>
+                        <td class="px-2 py-2 text-right row-total font-medium">${formatCurrency(0)}</td>
+                        <td class="px-2 py-2 text-center action-col"><button class="delete-row-btn">X</button></td>
+                    `;
+                    productRowsContainer.appendChild(row);
+                    return row;
+                };
+
+                productRowsContainer.addEventListener('input', (e) => {
+                    if (e.target.classList.contains('product-name')) {
+                        const inputValue = e.target.value;
+                        const selectedProduct = productsData.find(p => p.name === inputValue || p.sku === inputValue);
+                        if (selectedProduct) {
+                            const row = e.target.closest('tr');
+                            row.querySelector('.product-name').value = selectedProduct.name;
+                            row.querySelector('.sku').value = selectedProduct.sku;
+                            row.querySelector('.unit-cost').value = selectedProduct.price;
+                            if(selectedProduct.imageUrl) {
+                                productPreviewImage.src = selectedProduct.imageUrl;
+                                imagePreviewModal.classList.remove('hidden');
+                            }
+                        }
+                    }
+                    
+                    if (e.target.matches('.quantity, .unit-cost, .discount, .product-name')) {
+                        updateTotals();
+                    }
+                });
+
+                productRowsContainer.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('delete-row-btn')) {
+                        e.target.closest('tr').remove();
+                        updateTotals();
+                    }
+                });
+
+                addProductBtn.addEventListener('click', addRow);
+
+                downloadPdfBtn.addEventListener('click', () => {
+                    const clientName = document.getElementById('clientName').value || 'sin-nombre';
+                    const currentSaleNumber = saleNumberEl.textContent;
+                    const fileName = `Nota_Venta_${currentSaleNumber}_${clientName.replace(/ /g, '_')}.pdf`;
+
+                    const saleItems = [];
+                    const rows = productRowsContainer.querySelectorAll('tr');
+                    rows.forEach(row => {
+                        const productName = row.querySelector('.product-name').value;
+                        const sku = row.querySelector('.sku').value;
+                        const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+                        const unitCost = parseFloat(row.querySelector('.unit-cost').value) || 0;
+                        const discount = parseFloat(row.querySelector('.discount').value) || 0;
+                        const grossTotal = quantity * unitCost;
+                        const discountAmount = grossTotal * (discount / 100);
+                        const total = grossTotal - discountAmount;
+
+                        if (productName && quantity > 0) {
+                            saleItems.push({
+                                productName: productName,
+                                sku: sku,
+                                quantity: quantity,
+                                unitCost: unitCost,
+                                discount: discount,
+                                total: total,
+                                grossTotal: grossTotal,
+                                discountAmount: discountAmount
+                            });
+                        }
+                    });
+
+                    const saleData = {
+                        saleDate: document.getElementById('currentDate').textContent,
+                        saleNumber: parseInt(currentSaleNumber, 10),
+                        clientName: clientName,
+                        clientPhone: document.getElementById('clientPhone').value,
+                        clientNit: document.getElementById('clientNit').value,
+                        seller: loggedInUser,
+                        items: saleItems
+                    };
+
+                    const originalWidth = receiptEl.style.width;
+                    receiptEl.style.width = '1024px';
+
+                    const actionCols = document.querySelectorAll('.action-col');
+                    actionCols.forEach(col => col.style.display = 'none');
+                    addProductBtn.style.display = 'none';
+                    const inputs = receiptEl.querySelectorAll('input[type="text"], input[type="number"]');
+                    inputs.forEach(input => {
+                        const span = document.createElement('span');
+                        span.className = 'pdf-text-replacement';
+                        span.textContent = input.value;
+                        input.style.display = 'none';
+                        input.parentNode.insertBefore(span, input.nextSibling);
+                    });
+
+                    html2canvas(receiptEl, { 
+                        scale: 2,
+                        useCORS: true
+                    }).then(canvas => {
+                        const { jsPDF } = window.jspdf;
+                        const imgData = canvas.toDataURL('image/jpeg', 0.8);
+                        const pdf = new jsPDF({
+                            orientation: 'p',
+                            unit: 'mm',
+                            format: 'letter'
+                        });
+                        
+                        const margin = 10;
+                        const pdfWidth = pdf.internal.pageSize.getWidth();
+                        const contentWidth = pdfWidth - (margin * 2);
+                        const imgHeight = (canvas.height * contentWidth) / canvas.width;
+                        
+                        pdf.addImage(imgData, 'JPEG', margin, margin, contentWidth, imgHeight);
+                        pdf.save(fileName);
+                        
+                        if (!isReprintMode) {
+                            saveSale(saleData).then(() => {
+                                fetchAndSetSaleNumber();
+                            });
+                        }
+
+                    }).catch(err => {
+                        console.error("Error generating PDF:", err);
+                    }).finally(() => {
+                        receiptEl.style.width = originalWidth;
+                        actionCols.forEach(col => col.style.display = '');
+                        addProductBtn.style.display = '';
+                        document.querySelectorAll('.pdf-text-replacement').forEach(span => span.remove());
+                        inputs.forEach(input => input.style.display = '');
+                    });
+                });
+
+                generateReportBtn.addEventListener('click', async () => {
+                    const startDate = document.getElementById('startDate').value;
+                    const endDate = document.getElementById('endDate').value;
+                    const apiUrl = salesApiUrlInput.value.trim();
+
+                    if (!startDate || !endDate || !apiUrl) {
+                        alert('Por favor, selecciona un rango de fechas y configura la URL de la API.');
+                        return;
+                    }
+                    
+                    reportTitle.textContent = `Reporte de ventas Arelyshop (${startDate} a ${endDate})`;
+                    reportContent.innerHTML = '<p class="text-center">Generando reporte...</p>';
+                    reportModal.classList.remove('hidden');
+
+                    const reportUrl = `${apiUrl}?startDate=${startDate}&endDate=${endDate}`;
+
+                    try {
+                        if (productsData.length === 0 || !productsData[0].hasOwnProperty('cost')) {
+                            await loadProducts();
+                        }
+
+                        const response = await fetch(reportUrl);
+                        if (!response.ok) throw new Error('Error en la red al generar el reporte.');
+                        const data = await response.json();
+
+                        if (data.result === 'success' && data.reportData) {
+                            displayReport(data.reportData);
+                        } else {
+                            throw new Error(data.error || 'No se encontraron datos para el reporte.');
+                        }
+                    } catch (error) {
+                        reportContent.innerHTML = `<p class="text-center text-red-500">Error: ${error.message}</p>`;
+                    }
+                });
+
+                function displayReport(data) {
+                    let totalSales = 0;
+                    let totalCost = 0;
+
+                    const tableRows = data.map(item => {
+                        const productInfo = productsData.find(p => p.name === item.productName);
+                        const cost = productInfo ? productInfo.cost : 0;
+                        const sku = productInfo ? productInfo.sku : 'N/A';
+                        const itemCost = cost * item.quantity;
+                        const profit = item.totalProduct - itemCost;
+                        
+                        totalSales += item.totalProduct;
+                        totalCost += itemCost;
+
+                        return `
+                            <tr>
+                                <td class="border px-4 py-2">${item.date}</td>
+                                <td class="border px-4 py-2">${item.saleNumber}</td>
+                                <td class="border px-4 py-2">${sku}</td>
+                                <td class="border px-4 py-2">${item.productName}</td>
+                                <td class="border px-4 py-2 text-center">${item.quantity}</td>
+                                <td class="border px-4 py-2 text-right">${formatCurrency(item.totalProduct)}</td>
+                                <td class="border px-4 py-2 text-right">${formatCurrency(itemCost)}</td>
+                                <td class="border px-4 py-2 text-right font-semibold ${profit > 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(profit)}</td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    const totalProfit = totalSales - totalCost;
+                    
+                    reportContent.innerHTML = `
+                        <table id="reportTable" class="w-full text-sm text-left text-gray-500">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3">Fecha</th>
+                                    <th class="px-4 py-3">Nr. Venta</th>
+                                    <th class="px-4 py-3">SKU</th>
+                                    <th class="px-4 py-3">Producto</th>
+                                    <th class="px-4 py-3 text-center">Cant.</th>
+                                    <th class="px-4 py-3 text-right">Venta Total</th>
+                                    <th class="px-4 py-3 text-right">Costo Total</th>
+                                    <th class="px-4 py-3 text-right">Ganancia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                            <tfoot class="font-bold text-gray-800 bg-gray-100">
+                                <tr>
+                                    <td colspan="5" class="border px-4 py-2 text-right">TOTALES</td>
+                                    <td class="border px-4 py-2 text-right">${formatCurrency(totalSales)}</td>
+                                    <td class="border px-4 py-2 text-right">${formatCurrency(totalCost)}</td>
+                                    <td class="border px-4 py-2 text-right text-lg ${totalProfit > 0 ? 'text-green-700' : 'text-red-700'}">${formatCurrency(totalProfit)}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    `;
+                }
+                
+                downloadReportBtn.addEventListener('click', () => {
+                    const { jsPDF } = window.jspdf;
+                    
+                    const reportTable = document.getElementById('reportTable');
+                    const startDate = document.getElementById('startDate').value;
+                    const endDate = document.getElementById('endDate').value;
+                    const fileName = `Reporte_Ventas_${startDate}_a_${endDate}.pdf`;
+                    const reportPDFTitle = `Reporte de ventas Arelyshop (${startDate} a ${endDate})`;
+
+                    const originalWidth = reportTable.style.width;
+                    reportTable.style.width = '1024px';
+                    
+                    html2canvas(reportTable, { scale: 2, useCORS: true }).then(canvas => {
+                        reportTable.style.width = originalWidth;
+
+                        const imgData = canvas.toDataURL('image/png');
+                        const imgWidth = 190; // A4 width in mm minus margins
+                        const imgHeight = canvas.height * imgWidth / canvas.width;
+                        
+                        const pdf = new jsPDF({
+                            orientation: 'p',
+                            unit: 'mm',
+                            format: [imgWidth + 20, imgHeight + 40] // Custom format to fit all content
+                        });
+                        
+                        pdf.text(reportPDFTitle, 10, 15);
+                        pdf.addImage(imgData, 'PNG', 10, 25, imgWidth, imgHeight);
+                        pdf.save(fileName);
+                    });
+                });
+
+                closeReportModal.addEventListener('click', () => {
+                    reportModal.classList.add('hidden');
+                });
+
+                function resetForNewSale() {
+                    document.getElementById('clientName').value = '';
+                    document.getElementById('clientPhone').value = '';
+                    document.getElementById('clientNit').value = '';
+                    productRowsContainer.innerHTML = '';
+                    addRow();
+                    updateTotals();
+                    fetchAndSetSaleNumber();
+                    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('es-BO');
+                    searchStatusEl.textContent = '';
+                }
+
+                newSaleBtn.addEventListener('click', resetForNewSale);
+
+                // --- IMAGE PREVIEW MODAL ---
+                function hideImagePreview() {
+                    imagePreviewModal.classList.add('hidden');
+                }
+                closeImagePreview.addEventListener('click', hideImagePreview);
+                imagePreviewModal.addEventListener('click', (e) => {
+                    if (e.target === imagePreviewModal) {
+                        hideImagePreview();
+                    }
+                });
+
+
+                // --- INITIALIZE APP ---
+                fetchAndSetSaleNumber();
+                addRow();
+                loadProducts();
             }
-        }
-
-        function showError(type, data = '') {
-            resultsDiv.innerHTML = '';
-            let msg = '';
-            switch (type) {
-                case 'short-url':
-                    msg = `<strong>¡Enlace corto detectado!</strong> No se puede procesar directamente.<br><br><strong>Solución:</strong><br>1. <a href="${data}" target="_blank" rel="noopener noreferrer" class="font-bold underline text-blue-500">Haz clic aquí para abrirlo</a>.<br>2. Copia la nueva URL (larga) de tu navegador.<br>3. Pégala aquí y convierte de nuevo.`;
-                    break;
-                case 'invalid-url':
-                    msg = '<strong>¡URL no válida!</strong> No pudimos encontrar coordenadas. Asegúrate de que sea un enlace de Google Maps. Si estás pegando coordenadas (ej: 17°S 63°W), por favor usa la pestaña "Desde Coordenadas".';
-                    break;
-                case 'invalid-coords':
-                    msg = '<strong>¡Coordenadas no válidas!</strong> Usa un formato como "40.71, -74.00" o "40°42\'46\\"N 74°00\'21\\"W".';
-                    break;
-                case 'no-search-results':
-                    msg = '<strong>No se encontraron resultados.</strong> Por favor, intenta con una búsqueda más específica.';
-                    break;
-                case 'search-failed':
-                    msg = '<strong>La búsqueda falló.</strong> Por favor, revisa tu conexión a internet e inténtalo de nuevo.';
-                    break;
-            }
-            errorText.innerHTML = msg;
-            errorMessageDiv.classList.remove('hidden');
-        }
-
-        function hideError() {
-            errorMessageDiv.classList.add('hidden');
-        }
+        });
     </script>
-
 </body>
 </html>
