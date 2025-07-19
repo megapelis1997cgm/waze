@@ -531,11 +531,8 @@
                 function copyToClipboard(text, btn) {
                     const originalIcon = btn.innerHTML;
                     
-                    // Create a temporary textarea element to hold the text
                     const textArea = document.createElement("textarea");
                     textArea.value = text;
-
-                    // Prevent scrolling to bottom of page in MS Edge.
                     textArea.style.top = "0";
                     textArea.style.left = "0";
                     textArea.style.position = "fixed";
@@ -548,7 +545,7 @@
                         const successful = document.execCommand('copy');
                         if (successful) {
                             btn.innerHTML = '¡Copiado!';
-                            btn.style.backgroundColor = '#10B981'; // green-500
+                            btn.style.backgroundColor = '#10B981';
                             setTimeout(() => {
                                 btn.innerHTML = originalIcon;
                                 btn.style.backgroundColor = '';
@@ -647,6 +644,9 @@
 
 
                 async function loadProducts() {
+                    // Clear the search input field
+                    productSearchInput.value = '';
+
                     const url = googleSheetUrlInput.value.trim();
                     if (!url) {
                         loadingStatusEl.textContent = 'Por favor, introduce un enlace válido.';
