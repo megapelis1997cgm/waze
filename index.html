@@ -61,11 +61,14 @@
         .copy-btn {
             background-color: #e5e7eb;
             border: none;
-            padding: 2px 6px;
+            padding: 4px 8px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
             margin-left: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .copy-btn:hover {
             background-color: #d1d5db;
@@ -354,9 +357,24 @@
     
     <!-- Product Detail Modal -->
     <div id="productDetailModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-white p-4 rounded-lg shadow-xl max-w-2xl w-full relative">
-            <button id="closeProductModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-3xl font-bold">&times;</button>
-            <img id="modalProductImage" src="" alt="Vista detallada del producto" class="w-full h-auto max-h-[80vh] object-contain">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-3xl w-full relative flex flex-col md:flex-row gap-6 max-h-[90vh]">
+            <button id="closeProductModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-3xl font-bold z-10">&times;</button>
+            <div class="md:w-1/2 flex items-center justify-center bg-gray-100 rounded-lg">
+                 <img id="modalProductImage" src="" alt="Vista detallada del producto" class="w-full h-auto max-h-[80vh] object-contain rounded-lg">
+            </div>
+            <div class="md:w-1/2 flex flex-col py-4 overflow-y-auto">
+                <h2 id="modalProductName" class="text-2xl font-bold text-gray-900 mb-4"></h2>
+                <div class="space-y-3 text-gray-700 text-base">
+                    <p class="flex items-center justify-between"><strong>SKU:</strong> <span class="bg-gray-100 px-2 py-1 rounded"><span id="modalProductSku"></span> <button class="copy-btn" data-copy-type="modal-sku" title="Copiar SKU"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg></button></span></p>
+                    <p class="flex items-center justify-between"><strong>Código:</strong> <span class="bg-gray-100 px-2 py-1 rounded"><span id="modalProductCode"></span> <button class="copy-btn" data-copy-type="modal-code" title="Copiar Código"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg></button></span></p>
+                    <p><strong>Stock:</strong> <span id="modalProductStock" class="font-semibold"></span></p>
+                    <div class="mt-4 pt-4 border-t space-y-2">
+                        <p class="flex justify-between"><strong>Precio:</strong> <span id="modalProductPrice" class="font-semibold text-lg text-blue-600"></span></p>
+                        <p class="flex justify-between"><strong>Costo:</strong> <span id="modalProductCost" class="font-semibold"></span></p>
+                        <p class="flex justify-between"><strong>Mayoreo:</strong> <span id="modalProductWholesale" class="font-semibold"></span></p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -420,6 +438,13 @@
             // --- PRODUCT DETAIL MODAL ELEMENTS ---
             const productDetailModal = document.getElementById('productDetailModal');
             const modalProductImage = document.getElementById('modalProductImage');
+            const modalProductName = document.getElementById('modalProductName');
+            const modalProductSku = document.getElementById('modalProductSku');
+            const modalProductCode = document.getElementById('modalProductCode');
+            const modalProductStock = document.getElementById('modalProductStock');
+            const modalProductPrice = document.getElementById('modalProductPrice');
+            const modalProductCost = document.getElementById('modalProductCost');
+            const modalProductWholesale = document.getElementById('modalProductWholesale');
             const closeProductModal = document.getElementById('closeProductModal');
 
             let saleCounter = 1;
@@ -504,35 +529,38 @@
                 };
 
                 function copyToClipboard(text, btn) {
-                    const originalText = btn.innerHTML;
-                    navigator.clipboard.writeText(text).then(() => {
-                        btn.innerHTML = '¡Copiado!';
-                        btn.style.backgroundColor = '#10B981'; // green-500
-                        setTimeout(() => {
-                            btn.innerHTML = originalText;
-                            btn.style.backgroundColor = '';
-                        }, 1500);
-                    }).catch(err => {
-                        console.error('Failed to copy: ', err);
-                        // Fallback for older browsers
-                        const textArea = document.createElement("textarea");
-                        textArea.value = text;
-                        document.body.appendChild(textArea);
-                        textArea.focus();
-                        textArea.select();
-                        try {
-                            document.execCommand('copy');
+                    const originalIcon = btn.innerHTML;
+                    
+                    // Create a temporary textarea element to hold the text
+                    const textArea = document.createElement("textarea");
+                    textArea.value = text;
+
+                    // Prevent scrolling to bottom of page in MS Edge.
+                    textArea.style.top = "0";
+                    textArea.style.left = "0";
+                    textArea.style.position = "fixed";
+
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+
+                    try {
+                        const successful = document.execCommand('copy');
+                        if (successful) {
                             btn.innerHTML = '¡Copiado!';
-                            btn.style.backgroundColor = '#10B981';
-                             setTimeout(() => {
-                                btn.innerHTML = originalText;
+                            btn.style.backgroundColor = '#10B981'; // green-500
+                            setTimeout(() => {
+                                btn.innerHTML = originalIcon;
                                 btn.style.backgroundColor = '';
                             }, 1500);
-                        } catch (err) {
-                            console.error('Fallback copy failed: ', err);
+                        } else {
+                           console.error('Fallback copy was unsuccessful');
                         }
-                        document.body.removeChild(textArea);
-                    });
+                    } catch (err) {
+                        console.error('Fallback copy failed: ', err);
+                    }
+
+                    document.body.removeChild(textArea);
                 }
 
                 function renderSearchResults(products) {
@@ -544,24 +572,19 @@
 
                     products.forEach((product, index) => {
                         const card = document.createElement('div');
-                        card.className = 'bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-200 flex flex-col';
+                        card.className = 'bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-200 flex flex-col cursor-pointer';
                         card.dataset.index = index;
                         
                         const formattedPrice = formatCurrency(product.price);
-                        const formattedCost = formatCurrency(product.cost);
-                        const formattedWholesale = formatCurrency(product.wholesale);
 
                         card.innerHTML = `
-                            <img src="${product.photoUrl}" alt="${product.name}" class="w-full h-48 object-cover cursor-pointer product-image" onerror="this.onerror=null; this.src='https://placehold.co/400x400/e2e8f0/94a3b8?text=Sin+Imagen';">
+                            <img src="${product.photoUrl}" alt="${product.name}" class="w-full h-48 object-cover" onerror="this.onerror=null; this.src='https://placehold.co/400x400/e2e8f0/94a3b8?text=Sin+Imagen';">
                             <div class="p-4 flex-grow flex flex-col">
                                 <h3 class="font-bold text-md mb-2 truncate" title="${product.name}">${product.name}</h3>
-                                <p class="text-sm text-gray-600 flex items-center">SKU: ${product.sku || 'N/A'} <button class="copy-btn" data-copy-type="sku">Copiar</button></p>
-                                <p class="text-sm text-gray-600 flex items-center">Código: ${product.code || 'N/A'} <button class="copy-btn" data-copy-type="code">Copiar</button></p>
+                                <p class="text-sm text-gray-600">SKU: ${product.sku || 'N/A'}</p>
                                 <p class="text-sm text-gray-600">Stock: ${product.quantity}</p>
-                                <div class="mt-2 text-sm mt-auto">
-                                    <p><span class="font-semibold">Precio:</span> ${formattedPrice}</p>
-                                    <p><span class="font-semibold">Costo:</span> ${formattedCost}</p>
-                                    <p><span class="font-semibold">Mayoreo:</span> ${formattedWholesale}</p>
+                                <div class="mt-auto pt-2">
+                                    <p class="text-lg font-bold text-blue-600">${formattedPrice}</p>
                                 </div>
                             </div>
                         `;
@@ -569,34 +592,56 @@
                     });
                 }
                 
+                function openProductModal(product) {
+                    modalProductImage.src = product.photoUrl;
+                    modalProductImage.onerror = () => { modalProductImage.src = 'https://placehold.co/400x400/e2e8f0/94a3b8?text=Sin+Imagen'; };
+                    modalProductName.textContent = product.name;
+                    modalProductSku.textContent = product.sku || 'N/A';
+                    modalProductCode.textContent = product.code || 'N/A';
+                    modalProductStock.textContent = product.quantity;
+                    modalProductPrice.textContent = formatCurrency(product.price);
+                    modalProductCost.textContent = formatCurrency(product.cost);
+                    modalProductWholesale.textContent = formatCurrency(product.wholesale);
+                    productDetailModal.classList.remove('hidden');
+                }
+                
                 productSearchResults.addEventListener('click', (e) => {
-                    const card = e.target.closest('.bg-white');
+                    const card = e.target.closest('.cursor-pointer');
                     if (!card) return;
 
                     const productIndex = card.dataset.index;
-                    const product = productsData[productIndex];
-
-                    if (e.target.classList.contains('product-image')) {
-                        modalProductImage.src = product.photoUrl;
-                        productDetailModal.classList.remove('hidden');
-                    }
+                    const allProducts = Array.from(productSearchResults.querySelectorAll('.cursor-pointer'));
+                    const globalIndex = allProducts.indexOf(card);
                     
-                    if (e.target.classList.contains('copy-btn')) {
-                        const copyType = e.target.dataset.copyType;
-                        if (copyType === 'sku') {
-                            copyToClipboard(product.sku || '', e.target);
-                        } else if (copyType === 'code') {
-                            copyToClipboard(product.code || '', e.target);
-                        }
+                    const searchTerm = productSearchInput.value.toLowerCase().trim();
+                    const currentList = searchTerm ? productsData.filter(p => p.name.toLowerCase().includes(searchTerm) || (p.sku && p.sku.toLowerCase().includes(searchTerm)) || (p.code && p.code.toLowerCase().includes(searchTerm))) : productsData;
+                    
+                    const product = currentList[globalIndex];
+
+                    if (product) {
+                        openProductModal(product);
                     }
                 });
 
                 closeProductModal.addEventListener('click', () => {
                     productDetailModal.classList.add('hidden');
                 });
-                 productDetailModal.addEventListener('click', (e) => {
+                
+                productDetailModal.addEventListener('click', (e) => {
                     if (e.target === productDetailModal) {
-                         productDetailModal.classList.add('hidden');
+                        productDetailModal.classList.add('hidden');
+                    }
+                    
+                    const copyBtn = e.target.closest('.copy-btn');
+                    if (copyBtn) {
+                        const copyType = copyBtn.dataset.copyType;
+                        let textToCopy = '';
+                        if (copyType === 'modal-sku') {
+                            textToCopy = modalProductSku.textContent;
+                        } else if (copyType === 'modal-code') {
+                            textToCopy = modalProductCode.textContent;
+                        }
+                        copyToClipboard(textToCopy, copyBtn);
                     }
                 });
 
@@ -613,38 +658,34 @@
                     loadingStatusEl.style.color = 'gray';
                     const refreshIcon = refreshProductsBtn.querySelector('svg');
                     
-                    // Add animations and disable button
                     refreshProductsBtn.disabled = true;
                     refreshProductsBtn.classList.add('animate-pulse');
                     refreshIcon.classList.add('animate-spin');
 
                     try {
-                        // Add a cache-busting query parameter
                         const cacheBustUrl = `${url}&_=${new Date().getTime()}`;
                         const response = await fetch(cacheBustUrl);
                         if (!response.ok) throw new Error('No se pudo cargar la hoja de cálculo.');
                         const csvText = await response.text();
                         
                         const rows = csvText.split('\n').slice(1);
-                        // Columns: Nombre, Precio, Compra, Mayoreo, SKU, Cantidad, Foto 1, Code
                         productsData = rows.map(row => {
                             const columns = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                             if (columns.length >= 8 && columns[0]) {
                                 return {
                                     name: (columns[0] || '').trim().replace(/"/g, ''),
                                     price: parseFloat((columns[1] || '0').trim()) || 0,
-                                    cost: parseFloat((columns[2] || '0').trim()) || 0, // Compra
-                                    wholesale: parseFloat((columns[3] || '0').trim()) || 0, // Mayoreo
+                                    cost: parseFloat((columns[2] || '0').trim()) || 0,
+                                    wholesale: parseFloat((columns[3] || '0').trim()) || 0,
                                     sku: (columns[4] || '').trim().replace(/"/g, ''),
-                                    quantity: parseInt((columns[5] || '0').trim()) || 0, // Cantidad
-                                    photoUrl: (columns[6] || '').trim().replace(/"/g, ''), // Foto 1
-                                    code: (columns[7] || '').trim().replace(/"/g, '') // Code
+                                    quantity: parseInt((columns[5] || '0').trim()) || 0,
+                                    photoUrl: (columns[6] || '').trim().replace(/"/g, ''),
+                                    code: (columns[7] || '').trim().replace(/"/g, '')
                                 };
                             }
                             return null;
                         }).filter(p => p && p.name);
 
-                        // Populate the datalist for the POS table
                         productListDatalist.innerHTML = '';
                         productsData.forEach(product => {
                             const nameOption = document.createElement('option');
@@ -662,7 +703,6 @@
                             }
                         });
 
-                        // Initial render of the product search gallery
                         renderSearchResults(productsData); 
 
                         loadingStatusEl.textContent = `¡${productsData.length} productos cargados exitosamente!`;
@@ -674,7 +714,6 @@
                         loadingStatusEl.style.color = 'red';
                         renderSearchResults([]); // Clear results on error
                     } finally {
-                        // Remove animations and re-enable button
                         refreshProductsBtn.disabled = false;
                         refreshProductsBtn.classList.remove('animate-pulse');
                         refreshIcon.classList.remove('animate-spin');
