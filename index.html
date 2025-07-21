@@ -73,6 +73,38 @@
         .copy-btn:hover {
             background-color: #d1d5db;
         }
+        
+        /* Styles for Registration Form */
+        .form-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .form-title {
+            color: #111827;
+        }
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        .submit-btn {
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .submit-btn:hover {
+            background-color: #1d4ed8;
+        }
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+        #status-message {
+            transition: opacity 0.5s ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-f0f2f5">
@@ -115,6 +147,9 @@
                      class="h-12"
                      onerror="this.onerror=null; this.src='https://placehold.co/200x50/0f172a/ffffff?text=ArelyShop';">
                 <div class="flex items-center gap-4">
+                    <button id="showRegisterPageBtn" title="Registrar Nuevo Producto" class="p-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition duration-200 flex-shrink-0" style="display: none;">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </button>
                     <button id="refreshProductsBtn" title="Actualizar lista de productos" class="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-200 flex-shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M4 12a8 8 0 018-8v0a8 8 0 018 8v0a8 8 0 01-8 8v0a8 8 0 01-8-8v0z"></path></svg>
                     </button>
@@ -126,214 +161,294 @@
         </header>
 
         <main class="p-4 md:p-8 flex-grow">
-            <div class="max-w-4xl mx-auto">
-                <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">
-                    Punto de Venta Arelyshop
-                </h1>
+            <!-- Point of Sale Page -->
+            <div id="pos-page">
+                <div class="max-w-4xl mx-auto">
+                    <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">
+                        Punto de Venta Arelyshop
+                    </h1>
 
-                <!-- Toggle Button for Google Sheets Config (Admin only) -->
-                <div id="config-toggle-container" class="mb-4" style="display: none;">
-                    <button id="toggleConfigBtn" class="w-full flex justify-center items-center px-5 py-3 bg-white text-gray-700 font-semibold rounded-lg shadow-md hover:bg-gray-50 transition duration-200">
-                        <span>Configuración de Google Sheets</span>
-                        <svg id="arrowIcon" class="w-5 h-5 ml-2 transition-transform transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                </div>
-
-                <!-- Google Sheets Integration Section (Collapsible) -->
-                <div id="configSection">
-                    <div class="bg-white p-6 rounded-lg shadow-md mb-8 space-y-4">
-                        <div>
-                            <h2 class="text-lg font-semibold text-gray-800 mb-3">1. Cargar Productos desde Google Sheets</h2>
-                            <div class="flex flex-col sm:flex-row gap-2">
-                                <input type="url" id="googleSheetUrl" placeholder="Pega aquí el enlace .csv de tus productos" class="flex-grow p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vQbdGMpxHVvyjH9ZONt0qMqzUg3oNHFnJHe5bCXSxBH5Mt24EODbBUhWIMQsSL_cdQFGyN-3_obdXs1/pub?output=csv">
-                                <button id="loadProductsBtn" class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">Cargar Productos</button>
-                            </div>
-                            <p id="loadingStatus" class="text-sm text-gray-500 mt-2"></p>
-                        </div>
-                        <div>
-                            <h2 class="text-lg font-semibold text-gray-800 mb-3">2. Guardar Ventas en Google Sheets</h2>
-                            <p class="text-sm text-gray-600 mb-2">URL de tu aplicación web para guardar el historial de ventas.</p>
-                            <input type="url" id="salesApiUrl" placeholder="Pega aquí la URL de tu aplicación web" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" value="https://script.google.com/macros/s/AKfycbw6ys16kj9oFqaxtY8QbrQ8FYHipPZ8ixTEDauvHTOE0kLBCsMxBTbutKo3mEL0sDA/exec">
-                            <p id="savingStatus" class="text-sm text-gray-500 mt-2"></p>
-                        </div>
+                    <!-- Toggle Button for Google Sheets Config (Admin only) -->
+                    <div id="config-toggle-container" class="mb-4" style="display: none;">
+                        <button id="toggleConfigBtn" class="w-full flex justify-center items-center px-5 py-3 bg-white text-gray-700 font-semibold rounded-lg shadow-md hover:bg-gray-50 transition duration-200">
+                            <span>Configuración de Google Sheets</span>
+                            <svg id="arrowIcon" class="w-5 h-5 ml-2 transition-transform transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
                     </div>
-                </div>
-                
-                <!-- Toggle Button for Product Search -->
-                <div class="mb-4">
-                    <button id="toggleSearchBtn" class="w-full flex justify-center items-center px-5 py-3 bg-white text-gray-700 font-semibold rounded-lg shadow-md hover:bg-gray-50 transition duration-200">
-                        <span>Buscador de Productos</span>
-                        <svg id="searchArrowIcon" class="w-5 h-5 ml-2 transition-transform transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                </div>
 
-                <!-- Product Search Section (Collapsible) -->
-                <div id="productSearchSection">
-                    <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Buscar Productos</h2>
-                        <div class="mb-4">
-                            <input type="text" id="productSearchInput" placeholder="Buscar por Nombre, SKU o Código..." class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div id="productSearchResults" class="max-h-[60vh] overflow-y-auto grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-2">
-                            <!-- Search results will be dynamically inserted here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Actions Section -->
-                <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-                        <!-- New Sale -->
-                        <div class="md:col-span-1">
-                            <h2 class="text-lg font-semibold text-gray-800 mb-3">Nueva Venta</h2>
-                            <button id="newSaleBtn" class="w-full px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 flex items-center justify-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                Limpiar y Empezar
-                            </button>
-                        </div>
-                        <!-- Search -->
-                        <div class="md:col-span-2">
-                            <h2 class="text-lg font-semibold text-gray-800 mb-3">Reimprimir Nota de Venta</h2>
-                            <div class="flex flex-col sm:flex-row gap-2">
-                                <input type="number" id="searchSaleInput" placeholder="Introduce el Nr. de Venta" class="flex-grow p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <button id="searchSaleBtn" class="px-5 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-200">Buscar</button>
-                            </div>
-                            <p id="searchStatus" class="text-sm text-gray-500 mt-2"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Report Section (Admin only) -->
-                <div id="report-section-container" style="display: none;" class="bg-white p-6 rounded-lg shadow-md mb-8">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-3">Generar Reporte de Ventas</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label for="startDate" class="block text-xs font-medium text-gray-700">Fecha de Inicio</label>
-                            <input type="date" id="startDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                            <label for="endDate" class="block text-xs font-medium text-gray-700">Fecha de Fin</label>
-                            <input type="date" id="endDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                    </div>
-                    <button id="generateReportBtn" class="mt-4 w-full px-5 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition duration-200">Generar Reporte</button>
-                </div>
-                
-                <!-- Receipt Container -->
-                <div id="receipt" class="bg-white rounded-lg overflow-hidden">
-                    <!-- Receipt Header -->
-                    <div id="receiptHeader" class="bg-slate-900 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 gap-4">
-                        <div class="flex items-center">
-                            <img id="receiptLogo" src="https://dcdn-us.mitiendanube.com/stores/004/546/736/themes/common/logo-660776128-1736645739-9bb5db1715d3b799cdf782b0f0815d541736645739.webp?0" alt="Logo" class="h-10 mr-4" crossorigin="anonymous" onerror="this.onerror=null; this.src='https://placehold.co/100x40/ffffff/000000?text=Logo';">
+                    <!-- Google Sheets Integration Section (Collapsible) -->
+                    <div id="configSection">
+                        <div class="bg-white p-6 rounded-lg shadow-md mb-8 space-y-4">
                             <div>
-                                <h2 class="text-xl font-bold">ArelyShop</h2>
-                                <p class="text-sm text-slate-300">Santa Cruz de la Sierra, Bolivia</p>
+                                <h2 class="text-lg font-semibold text-gray-800 mb-3">1. Cargar Productos desde Google Sheets</h2>
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <input type="url" id="googleSheetUrl" placeholder="Pega aquí el enlace .csv de tus productos" class="flex-grow p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vQbdGMpxHVvyjH9ZONt0qMqzUg3oNHFnJHe5bCXSxBH5Mt24EODbBUhWIMQsSL_cdQFGyN-3_obdXs1/pub?output=csv">
+                                    <button id="loadProductsBtn" class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">Cargar Productos</button>
+                                </div>
+                                <p id="loadingStatus" class="text-sm text-gray-500 mt-2"></p>
                             </div>
-                        </div>
-                        <div class="text-left sm:text-right mt-4 sm:mt-0">
-                            <p class="text-lg font-semibold" id="receiptTitle">Nota de Venta</p>
-                            <p id="saleNumberLine" class="text-sm text-slate-300"><strong>Nr:</strong> <span id="saleNumber">...</span></p>
-                            <p id="quoteValidityLine" class="text-sm text-slate-300" style="display: none;"><strong>Validez:</strong> 24 horas</p>
-                            <p class="text-sm text-slate-300"><strong>Fecha:</strong> <span id="currentDate"></span></p>
+                            <div>
+                                <h2 class="text-lg font-semibold text-gray-800 mb-3">2. Guardar Ventas en Google Sheets</h2>
+                                <p class="text-sm text-gray-600 mb-2">URL de tu aplicación web para guardar el historial de ventas.</p>
+                                <input type="url" id="salesApiUrl" placeholder="Pega aquí la URL de tu aplicación web" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" value="https://script.google.com/macros/s/AKfycbw6ys16kj9oFqaxtY8QbrQ8FYHipPZ8ixTEDauvHTOE0kLBCsMxBTbutKo3mEL0sDA/exec">
+                                <p id="savingStatus" class="text-sm text-gray-500 mt-2"></p>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="p-6">
-                        <!-- Customer Info -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            <div>
-                                <label for="clientName" class="block text-sm font-medium text-gray-700">Nombre del Cliente:</label>
-                                <input type="text" id="clientName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+                    <!-- Toggle Button for Product Search -->
+                    <div class="mb-4">
+                        <button id="toggleSearchBtn" class="w-full flex justify-center items-center px-5 py-3 bg-white text-gray-700 font-semibold rounded-lg shadow-md hover:bg-gray-50 transition duration-200">
+                            <span>Buscador de Productos</span>
+                            <svg id="searchArrowIcon" class="w-5 h-5 ml-2 transition-transform transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Product Search Section (Collapsible) -->
+                    <div id="productSearchSection">
+                        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-4">Buscar Productos</h2>
+                            <div class="mb-4">
+                                <input type="text" id="productSearchInput" placeholder="Buscar por Nombre, SKU o Código..." class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
-                            <div>
-                                <label for="clientPhone" class="block text-sm font-medium text-gray-700">Teléfono:</label>
-                                <input type="text" id="clientPhone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
-                            </div>
-                            <div>
-                                <label for="clientNit" class="block text-sm font-medium text-gray-700">NIT o CI:</label>
-                                <input type="text" id="clientNit" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+                            <div id="productSearchResults" class="max-h-[60vh] overflow-y-auto grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-2">
+                                <!-- Search results will be dynamically inserted here -->
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Products Table -->
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200 product-table">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cant.</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">Producto</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo Unit.</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Desc. (%)</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider action-col"></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="product-rows" class="bg-white divide-y divide-gray-200">
-                                    <!-- Product rows will be inserted here by JavaScript -->
-                                </tbody>
-                            </table>
-                            <datalist id="productList"></datalist>
-                        </div>
-                        <button id="addProductBtn" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 text-sm">+ Añadir Producto</button>
-
-                        <!-- Totals Section -->
-                        <div class="flex justify-end mt-6">
-                            <div class="w-full max-w-xs">
-                                <div class="flex justify-between text-gray-700">
-                                    <span>Subtotal:</span>
-                                    <span id="subtotal">Bs. 0.00</span>
+                    <!-- Actions Section -->
+                    <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                            <!-- New Sale -->
+                            <div class="md:col-span-1">
+                                <h2 class="text-lg font-semibold text-gray-800 mb-3">Nueva Venta</h2>
+                                <button id="newSaleBtn" class="w-full px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 flex items-center justify-center">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                    Limpiar y Empezar
+                                </button>
+                            </div>
+                            <!-- Search -->
+                            <div class="md:col-span-2">
+                                <h2 class="text-lg font-semibold text-gray-800 mb-3">Reimprimir Nota de Venta</h2>
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <input type="number" id="searchSaleInput" placeholder="Introduce el Nr. de Venta" class="flex-grow p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <button id="searchSaleBtn" class="px-5 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-200">Buscar</button>
                                 </div>
-                                <div class="flex justify-between font-bold text-xl text-gray-900 mt-2 pt-2 border-t">
-                                    <span>MONTO TOTAL:</span>
-                                    <span id="grandTotal">Bs. 0.00</span>
+                                <p id="searchStatus" class="text-sm text-gray-500 mt-2"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Report Section (Admin only) -->
+                    <div id="report-section-container" style="display: none;" class="bg-white p-6 rounded-lg shadow-md mb-8">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-3">Generar Reporte de Ventas</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="startDate" class="block text-xs font-medium text-gray-700">Fecha de Inicio</label>
+                                <input type="date" id="startDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            <div>
+                                <label for="endDate" class="block text-xs font-medium text-gray-700">Fecha de Fin</label>
+                                <input type="date" id="endDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                        </div>
+                        <button id="generateReportBtn" class="mt-4 w-full px-5 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition duration-200">Generar Reporte</button>
+                    </div>
+                    
+                    <!-- Receipt Container -->
+                    <div id="receipt" class="bg-white rounded-lg overflow-hidden">
+                        <!-- Receipt Header -->
+                        <div id="receiptHeader" class="bg-slate-900 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 gap-4">
+                            <div class="flex items-center">
+                                <img id="receiptLogo" src="https://dcdn-us.mitiendanube.com/stores/004/546/736/themes/common/logo-660776128-1736645739-9bb5db1715d3b799cdf782b0f0815d541736645739.webp?0" alt="Logo" class="h-10 mr-4" crossorigin="anonymous" onerror="this.onerror=null; this.src='https://placehold.co/100x40/ffffff/000000?text=Logo';">
+                                <div>
+                                    <h2 class="text-xl font-bold">ArelyShop</h2>
+                                    <p class="text-sm text-slate-300">Santa Cruz de la Sierra, Bolivia</p>
                                 </div>
+                            </div>
+                            <div class="text-left sm:text-right mt-4 sm:mt-0">
+                                <p class="text-lg font-semibold" id="receiptTitle">Nota de Venta</p>
+                                <p id="saleNumberLine" class="text-sm text-slate-300"><strong>Nr:</strong> <span id="saleNumber">...</span></p>
+                                <p id="quoteValidityLine" class="text-sm text-slate-300" style="display: none;"><strong>Validez:</strong> 24 horas</p>
+                                <p class="text-sm text-slate-300"><strong>Fecha:</strong> <span id="currentDate"></span></p>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6">
+                            <!-- Customer Info -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <div>
+                                    <label for="clientName" class="block text-sm font-medium text-gray-700">Nombre del Cliente:</label>
+                                    <input type="text" id="clientName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+                                </div>
+                                <div>
+                                    <label for="clientPhone" class="block text-sm font-medium text-gray-700">Teléfono:</label>
+                                    <input type="text" id="clientPhone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+                                </div>
+                                <div>
+                                    <label for="clientNit" class="block text-sm font-medium text-gray-700">NIT o CI:</label>
+                                    <input type="text" id="clientNit" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+                                </div>
+                            </div>
+
+                            <!-- Products Table -->
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 product-table">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cant.</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">Producto</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo Unit.</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Desc. (%)</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider action-col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="product-rows" class="bg-white divide-y divide-gray-200">
+                                        <!-- Product rows will be inserted here by JavaScript -->
+                                    </tbody>
+                                </table>
+                                <datalist id="productList"></datalist>
+                            </div>
+                            <button id="addProductBtn" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 text-sm">+ Añadir Producto</button>
+
+                            <!-- Totals Section -->
+                            <div class="flex justify-end mt-6">
+                                <div class="w-full max-w-xs">
+                                    <div class="flex justify-between text-gray-700">
+                                        <span>Subtotal:</span>
+                                        <span id="subtotal">Bs. 0.00</span>
+                                    </div>
+                                    <div class="flex justify-between font-bold text-xl text-gray-900 mt-2 pt-2 border-t">
+                                        <span>MONTO TOTAL:</span>
+                                        <span id="grandTotal">Bs. 0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="text-center border-t mt-8 pt-4">
+                                <p class="text-gray-700 font-semibold">¡Gracias por su compra!</p>
+                                <p class="text-sm text-gray-500">
+                                    Visita nuestra tienda online: 
+                                    <a href="https://arelyshopbo.mitiendanube.com/productos/" target="_blank" class="text-blue-600 hover:underline">arelyshopbo.mitiendanube.com</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="text-center mt-8 space-y-4 md:space-y-0 md:space-x-4 md:flex md:justify-center">
+                        <button id="downloadQuoteBtn" class="w-full md:w-auto px-8 py-3 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition duration-200 shadow-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Descargar Cotización (PDF)
+                        </button>
+                        <button id="downloadPdfBtn" class="w-full md:w-auto px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition duration-200 shadow-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Generar Venta y Descargar PDF
+                        </button>
+                    </div>
+
+                    <!-- QR Section -->
+                    <div id="qr-section" class="mt-8 flex flex-col items-center">
+                        <div class="bg-white rounded-lg shadow-md p-6 text-center w-[500px] h-[500px] max-w-[90vw] max-h-[90vw] flex flex-col justify-center items-center">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4 flex-shrink-0">Escanea y paga</h3>
+                            <div class="w-full h-full flex-grow">
+                                <img src="https://lh3.googleusercontent.com/d/12I70V-iLavoALoXZW9OyeI2zSXKXQcKb=w800?authuser=0" alt="Código QR para pago" class="w-full h-full object-contain" crossorigin="anonymous" onerror="this.onerror=null; this.src='https://placehold.co/500x500/ffffff/000000?text=QR+Error';">
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-4 mt-6">
+                             <a href="https://arelyshopbo.mitiendanube.com/productos/" target="_blank" class="px-6 py-3 bg-pink-500 text-white font-bold rounded-lg hover:bg-pink-600 transition duration-200 shadow-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                Tienda Online
+                            </a>
+                            <a href="https://megapelis1997cgm.github.io/medidas/" target="_blank" class="px-6 py-3 bg-indigo-500 text-white font-bold rounded-lg hover:bg-indigo-600 transition duration-200 shadow-lg flex items-center justify-center">
+                               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                Herramientas de Diseño
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Register Product Page (hidden by default) -->
+            <div id="register-page" class="hidden">
+                <div class="form-container">
+                    <div class="text-center mb-8">
+                        <h1 class="text-3xl font-bold form-title">Registrar Nuevo Producto</h1>
+                        <p class="text-gray-500 mt-2">Completa el formulario para añadir un item al inventario.</p>
+                    </div>
+
+                    <form id="product-form">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Campo Nombre -->
+                            <div class="md:col-span-2">
+                                <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto</label>
+                                <input type="text" id="nombre" name="nombre" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input" required>
+                            </div>
+                            
+                            <!-- Campo Precio -->
+                            <div>
+                                <label for="precio" class="block text-sm font-medium text-gray-700 mb-1">Precio (Venta)</label>
+                                <input type="number" step="0.01" id="precio" name="precio" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input" required>
+                            </div>
+                            
+                            <!-- Campo Compra -->
+                            <div>
+                                <label for="compra" class="block text-sm font-medium text-gray-700 mb-1">Precio (Compra)</label>
+                                <input type="number" step="0.01" id="compra" name="compra" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input" required>
+                            </div>
+
+                            <!-- Campo Mayoreo -->
+                            <div>
+                                <label for="mayoreo" class="block text-sm font-medium text-gray-700 mb-1">Precio (Mayoreo)</label>
+                                <input type="number" step="0.01" id="mayoreo" name="mayoreo" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input">
+                            </div>
+
+                            <!-- Campo Cantidad -->
+                            <div>
+                                <label for="cantidad" class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                                <input type="number" id="cantidad" name="cantidad" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input" required>
+                            </div>
+
+                            <!-- Campo SKU -->
+                            <div class="md:col-span-2">
+                                <label for="sku" class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+                                <input type="text" id="sku" name="sku" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input">
+                            </div>
+                            
+                            <!-- Campo Foto 1 -->
+                            <div class="md:col-span-2">
+                                <label for="foto1" class="block text-sm font-medium text-gray-700 mb-1">URL de Foto 1</label>
+                                <input type="url" id="foto1" name="foto1" placeholder="https://ejemplo.com/imagen.jpg" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input">
+                            </div>
+
+                            <!-- Campo Code -->
+                            <div class="md:col-span-2">
+                                <label for="code" class="block text-sm font-medium text-gray-700 mb-1">Código de Barras (Code)</label>
+                                <input type="text" id="code" name="code" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input">
                             </div>
                         </div>
 
-                        <!-- Footer -->
-                        <div class="text-center border-t mt-8 pt-4">
-                            <p class="text-gray-700 font-semibold">¡Gracias por su compra!</p>
-                            <p class="text-sm text-gray-500">
-                                Visita nuestra tienda online: 
-                                <a href="https://arelyshopbo.mitiendanube.com/productos/" target="_blank" class="text-blue-600 hover:underline">arelyshopbo.mitiendanube.com</a>
-                            </p>
+                        <!-- Botón de Envío -->
+                        <div class="mt-8 text-center">
+                            <button type="submit" id="submit-button" class="w-full md:w-auto px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md submit-btn focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Registrar Producto
+                            </button>
                         </div>
+                    </form>
+
+                    <!-- Mensaje de Estado (éxito o error) -->
+                    <div id="status-message" class="mt-6 p-4 text-center rounded-lg opacity-0"></div>
+                    
+                    <!-- Botón para volver al POS -->
+                    <div class="mt-8 text-center border-t pt-6">
+                         <button id="backToPosBtn" class="text-blue-600 hover:underline">← Volver al Punto de Venta</button>
                     </div>
                 </div>
-
-                <!-- Action Buttons -->
-                <div class="text-center mt-8 space-y-4 md:space-y-0 md:space-x-4 md:flex md:justify-center">
-                    <button id="downloadQuoteBtn" class="w-full md:w-auto px-8 py-3 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition duration-200 shadow-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        Descargar Cotización (PDF)
-                    </button>
-                    <button id="downloadPdfBtn" class="w-full md:w-auto px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition duration-200 shadow-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Generar Venta y Descargar PDF
-                    </button>
-                </div>
-
-                <!-- QR Section -->
-                <div id="qr-section" class="mt-8 flex flex-col items-center">
-                    <div class="bg-white rounded-lg shadow-md p-6 text-center w-[500px] h-[500px] max-w-[90vw] max-h-[90vw] flex flex-col justify-center items-center">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex-shrink-0">Escanea y paga</h3>
-                        <div class="w-full h-full flex-grow">
-                            <img src="https://lh3.googleusercontent.com/d/12I70V-iLavoALoXZW9OyeI2zSXKXQcKb=w800?authuser=0" alt="Código QR para pago" class="w-full h-full object-contain" crossorigin="anonymous" onerror="this.onerror=null; this.src='https://placehold.co/500x500/ffffff/000000?text=QR+Error';">
-                        </div>
-                    </div>
-                    <div class="flex flex-col sm:flex-row gap-4 mt-6">
-                         <a href="https://arelyshopbo.mitiendanube.com/productos/" target="_blank" class="px-6 py-3 bg-pink-500 text-white font-bold rounded-lg hover:bg-pink-600 transition duration-200 shadow-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                            Tienda Online
-                        </a>
-                        <a href="https://megapelis1997cgm.github.io/medidas/" target="_blank" class="px-6 py-3 bg-indigo-500 text-white font-bold rounded-lg hover:bg-indigo-600 transition duration-200 shadow-lg flex items-center justify-center">
-                           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                            Herramientas de Diseño
-                        </a>
-                    </div>
-                </div>
-
             </div>
         </main>
         <footer class="bg-slate-900 text-white text-center p-4 mt-8">
@@ -447,6 +562,12 @@
             const modalProductWholesale = document.getElementById('modalProductWholesale');
             const closeProductModal = document.getElementById('closeProductModal');
 
+            // --- PAGE NAVIGATION ELEMENTS ---
+            const posPage = document.getElementById('pos-page');
+            const registerPage = document.getElementById('register-page');
+            const showRegisterPageBtn = document.getElementById('showRegisterPageBtn');
+            const backToPosBtn = document.getElementById('backToPosBtn');
+
             let saleCounter = 1;
             let productsData = [];
             let isReprintMode = false;
@@ -492,10 +613,24 @@
                 if (loggedInUser.toLowerCase() === 'admin') {
                     configToggleContainer.style.display = 'block';
                     reportSectionContainer.style.display = 'block';
+                    showRegisterPageBtn.style.display = 'inline-flex';
                 } else {
                     configToggleContainer.style.display = 'none';
                     reportSectionContainer.style.display = 'none';
+                    showRegisterPageBtn.style.display = 'none';
                 }
+
+                // --- PAGE NAVIGATION LOGIC ---
+                showRegisterPageBtn.addEventListener('click', () => {
+                    posPage.classList.add('hidden');
+                    registerPage.classList.remove('hidden');
+                });
+
+                backToPosBtn.addEventListener('click', () => {
+                    registerPage.classList.add('hidden');
+                    posPage.classList.remove('hidden');
+                });
+
 
                 toggleConfigBtn.addEventListener('click', () => {
                     configSection.classList.toggle('open');
@@ -1147,6 +1282,68 @@
                 fetchAndSetSaleNumber();
                 addRow();
                 loadProducts();
+
+                // --- REGISTER FORM LOGIC ---
+                const productForm = document.getElementById('product-form');
+                const statusMessage = document.getElementById('status-message');
+                const submitButton = document.getElementById('submit-button');
+                const googleScriptURL = 'https://script.google.com/macros/s/AKfycbzkmr5vz2v-6o-krK84pasC3d4xydqNiIyw0wPnhOG7Tj66-elnTBFQvzZkGnzDPsWO/exec';
+
+                productForm.addEventListener('submit', function(e) {
+                    e.preventDefault(); 
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Registrando...';
+
+                    const formData = new FormData(productForm);
+                    const data = {};
+                    formData.forEach((value, key) => {
+                        if (key === 'precio' || key === 'compra' || key === 'mayoreo' || key === 'cantidad') {
+                            data[key] = parseFloat(value) || 0;
+                        } else {
+                            data[key] = value;
+                        }
+                    });
+
+                    fetch(googleScriptURL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'text/plain;charset=utf-8',
+                        },
+                        body: JSON.stringify(data),
+                    })
+                    .then(res => res.json())
+                    .then(response => {
+                        console.log('Respuesta del servidor:', response);
+                        if (response.result === 'success') {
+                            showStatusMessage('¡Producto registrado con éxito!', 'success');
+                            productForm.reset(); 
+                        } else {
+                            showStatusMessage(`Error: ${response.error}`, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al enviar el formulario:', error);
+                        showStatusMessage('Error de conexión o de script. Revisa la consola (F12) para más detalles.', 'error');
+                    })
+                    .finally(() => {
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Registrar Producto';
+                    });
+                });
+
+                function showStatusMessage(message, type) {
+                    statusMessage.textContent = message;
+                    statusMessage.className = 'mt-6 p-4 text-center rounded-lg opacity-100 ';
+                    if (type === 'success') {
+                        statusMessage.classList.add('bg-green-100', 'text-green-800');
+                    } else {
+                        statusMessage.classList.add('bg-red-100', 'text-red-800');
+                    }
+
+                    setTimeout(() => {
+                        statusMessage.style.opacity = '0';
+                    }, 5000);
+                }
             }
         });
     </script>
