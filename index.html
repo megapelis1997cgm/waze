@@ -76,7 +76,7 @@
         
         /* Styles for Registration Form */
         .form-container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 2rem auto;
             padding: 2rem;
             background-color: white;
@@ -104,6 +104,17 @@
         }
         #status-message {
             transition: opacity 0.5s ease-in-out;
+        }
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            border-bottom-color: #3b82f6;
+            color: #3b82f6;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -377,74 +388,87 @@
             <!-- Register Product Page (hidden by default) -->
             <div id="register-page" class="hidden">
                 <div class="form-container">
-                    <div class="text-center mb-8">
-                        <h1 class="text-3xl font-bold form-title">Registrar Nuevo Producto</h1>
-                        <p class="text-gray-500 mt-2">Completa el formulario para añadir un item al inventario.</p>
+                    <div class="text-center mb-6">
+                        <h1 class="text-3xl font-bold form-title">Gestión de Inventario</h1>
+                        <p class="text-gray-500 mt-2">Añade, visualiza y edita tus productos.</p>
                     </div>
 
-                    <form id="product-form">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Campo Nombre -->
-                            <div class="md:col-span-2">
-                                <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto</label>
-                                <input type="text" id="nombre" name="nombre" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input" required>
-                            </div>
-                            
-                            <!-- Campo Precio -->
-                            <div>
-                                <label for="precio" class="block text-sm font-medium text-gray-700 mb-1">Precio (Venta)</label>
-                                <input type="number" step="0.01" id="precio" name="precio" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input" required>
-                            </div>
-                            
-                            <!-- Campo Compra -->
-                            <div>
-                                <label for="compra" class="block text-sm font-medium text-gray-700 mb-1">Precio (Compra)</label>
-                                <input type="number" step="0.01" id="compra" name="compra" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input" required>
-                            </div>
+                    <!-- Tabs -->
+                    <div class="border-b border-gray-200 mb-6">
+                        <nav class="flex justify-center -mb-px" aria-label="Tabs">
+                            <button id="register-tab" class="tab-btn active">Registrar Nuevo</button>
+                            <button id="inventory-tab" class="tab-btn">Ver Inventario</button>
+                        </nav>
+                    </div>
 
-                            <!-- Campo Mayoreo -->
-                            <div>
-                                <label for="mayoreo" class="block text-sm font-medium text-gray-700 mb-1">Precio (Mayoreo)</label>
-                                <input type="number" step="0.01" id="mayoreo" name="mayoreo" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input">
+                    <!-- Register Form View -->
+                    <div id="register-view">
+                        <form id="product-form">
+                            <input type="hidden" id="edit-row-index" name="rowIndex">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="md:col-span-2">
+                                    <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto</label>
+                                    <input type="text" id="nombre" name="nombre" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input" required>
+                                </div>
+                                <div>
+                                    <label for="precio" class="block text-sm font-medium text-gray-700 mb-1">Precio (Venta)</label>
+                                    <input type="number" step="0.01" id="precio" name="precio" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input" required>
+                                </div>
+                                <div>
+                                    <label for="compra" class="block text-sm font-medium text-gray-700 mb-1">Precio (Compra)</label>
+                                    <input type="number" step="0.01" id="compra" name="compra" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input" required>
+                                </div>
+                                <div>
+                                    <label for="mayoreo" class="block text-sm font-medium text-gray-700 mb-1">Precio (Mayoreo)</label>
+                                    <input type="number" step="0.01" id="mayoreo" name="mayoreo" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input">
+                                </div>
+                                <div>
+                                    <label for="cantidad" class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                                    <input type="number" id="cantidad" name="cantidad" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input" required>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="sku" class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+                                    <input type="text" id="sku" name="sku" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="foto1" class="block text-sm font-medium text-gray-700 mb-1">URL de Foto 1</label>
+                                    <input type="url" id="foto1" name="foto1" placeholder="https://ejemplo.com/imagen.jpg" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="code" class="block text-sm font-medium text-gray-700 mb-1">Código de Barras (Code)</label>
+                                    <input type="text" id="code" name="code" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input">
+                                </div>
                             </div>
+                            <div class="mt-8 text-center">
+                                <button type="submit" id="submit-button" class="w-full md:w-auto px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md submit-btn focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Registrar Producto
+                                </button>
+                            </div>
+                        </form>
+                        <div id="status-message" class="mt-6 p-4 text-center rounded-lg opacity-0"></div>
+                    </div>
 
-                            <!-- Campo Cantidad -->
-                            <div>
-                                <label for="cantidad" class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
-                                <input type="number" id="cantidad" name="cantidad" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input" required>
-                            </div>
-
-                            <!-- Campo SKU -->
-                            <div class="md:col-span-2">
-                                <label for="sku" class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
-                                <input type="text" id="sku" name="sku" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input">
-                            </div>
-                            
-                            <!-- Campo Foto 1 -->
-                            <div class="md:col-span-2">
-                                <label for="foto1" class="block text-sm font-medium text-gray-700 mb-1">URL de Foto 1</label>
-                                <input type="url" id="foto1" name="foto1" placeholder="https://ejemplo.com/imagen.jpg" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input">
-                            </div>
-
-                            <!-- Campo Code -->
-                            <div class="md:col-span-2">
-                                <label for="code" class="block text-sm font-medium text-gray-700 mb-1">Código de Barras (Code)</label>
-                                <input type="text" id="code" name="code" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm form-input">
-                            </div>
+                    <!-- Inventory List View -->
+                    <div id="inventory-view" class="hidden">
+                        <input type="text" id="inventorySearchInput" placeholder="Buscar en inventario..." class="w-full p-3 mb-4 border border-gray-300 rounded-lg">
+                        <div class="overflow-x-auto max-h-[60vh]">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50 sticky top-0">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-table-body" class="bg-white divide-y divide-gray-200">
+                                    <!-- Inventory rows will be inserted here -->
+                                </tbody>
+                            </table>
                         </div>
+                    </div>
 
-                        <!-- Botón de Envío -->
-                        <div class="mt-8 text-center">
-                            <button type="submit" id="submit-button" class="w-full md:w-auto px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md submit-btn focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                Registrar Producto
-                            </button>
-                        </div>
-                    </form>
-
-                    <!-- Mensaje de Estado (éxito o error) -->
-                    <div id="status-message" class="mt-6 p-4 text-center rounded-lg opacity-0"></div>
-                    
-                    <!-- Botón para volver al POS -->
                     <div class="mt-8 text-center border-t pt-6">
                          <button id="backToPosBtn" class="text-blue-600 hover:underline">← Volver al Punto de Venta</button>
                     </div>
@@ -567,6 +591,19 @@
             const registerPage = document.getElementById('register-page');
             const showRegisterPageBtn = document.getElementById('showRegisterPageBtn');
             const backToPosBtn = document.getElementById('backToPosBtn');
+
+            // --- REGISTER/INVENTORY PAGE ELEMENTS ---
+            const registerTab = document.getElementById('register-tab');
+            const inventoryTab = document.getElementById('inventory-tab');
+            const registerView = document.getElementById('register-view');
+            const inventoryView = document.getElementById('inventory-view');
+            const inventoryTableBody = document.getElementById('inventory-table-body');
+            const inventorySearchInput = document.getElementById('inventorySearchInput');
+            const productForm = document.getElementById('product-form');
+            const statusMessage = document.getElementById('status-message');
+            const submitButton = document.getElementById('submit-button');
+            const editRowIndexInput = document.getElementById('edit-row-index');
+
 
             let saleCounter = 1;
             let productsData = [];
@@ -804,10 +841,11 @@
                         const csvText = await response.text();
                         
                         const rows = csvText.split('\n').slice(1);
-                        productsData = rows.map(row => {
+                        productsData = rows.map((row, index) => {
                             const columns = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                             if (columns.length >= 8 && columns[0]) {
                                 return {
+                                    rowIndex: index + 2, // Sheet rows are 1-based, and we skip the header
                                     name: (columns[0] || '').trim().replace(/"/g, ''),
                                     price: parseFloat((columns[1] || '0').trim()) || 0,
                                     cost: parseFloat((columns[2] || '0').trim()) || 0,
@@ -839,6 +877,7 @@
                         });
 
                         renderSearchResults(productsData); 
+                        renderInventoryTable(productsData);
 
                         loadingStatusEl.textContent = `¡${productsData.length} productos cargados exitosamente!`;
                         loadingStatusEl.style.color = 'green';
@@ -1283,16 +1322,92 @@
                 addRow();
                 loadProducts();
 
-                // --- REGISTER FORM LOGIC ---
-                const productForm = document.getElementById('product-form');
-                const statusMessage = document.getElementById('status-message');
-                const submitButton = document.getElementById('submit-button');
+                // --- REGISTER/INVENTORY PAGE LOGIC ---
+                registerTab.addEventListener('click', () => {
+                    registerTab.classList.add('active');
+                    inventoryTab.classList.remove('active');
+                    registerView.classList.remove('hidden');
+                    inventoryView.classList.add('hidden');
+                    productForm.reset();
+                    submitButton.textContent = 'Registrar Producto';
+                    editRowIndexInput.value = '';
+                });
+
+                inventoryTab.addEventListener('click', () => {
+                    inventoryTab.classList.add('active');
+                    registerTab.classList.remove('active');
+                    inventoryView.classList.remove('hidden');
+                    registerView.classList.add('hidden');
+                    renderInventoryTable(productsData);
+                });
+                
+                function renderInventoryTable(products) {
+                    inventoryTableBody.innerHTML = '';
+                    const searchTerm = inventorySearchInput.value.toLowerCase();
+                    const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm) || (p.sku && p.sku.toLowerCase().includes(searchTerm)));
+
+                    if (filteredProducts.length === 0) {
+                        inventoryTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">No se encontraron productos.</td></tr>`;
+                        return;
+                    }
+
+                    filteredProducts.forEach(product => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="px-4 py-2 whitespace-nowrap">${product.name}</td>
+                            <td class="px-4 py-2 whitespace-nowrap">${product.sku || 'N/A'}</td>
+                            <td class="px-4 py-2 whitespace-nowrap">${formatCurrency(product.price)}</td>
+                            <td class="px-4 py-2 whitespace-nowrap">${product.quantity}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm font-medium">
+                                <button class="text-indigo-600 hover:text-indigo-900 edit-product-btn" data-row-index="${product.rowIndex}">Editar</button>
+                                <button class="text-red-600 hover:text-red-900 ml-4 delete-product-btn" data-row-index="${product.rowIndex}">Eliminar</button>
+                            </td>
+                        `;
+                        inventoryTableBody.appendChild(row);
+                    });
+                }
+
+                inventorySearchInput.addEventListener('input', () => renderInventoryTable(productsData));
+                
+                inventoryTableBody.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('edit-product-btn')) {
+                        const rowIndex = e.target.dataset.rowIndex;
+                        const productToEdit = productsData.find(p => p.rowIndex == rowIndex);
+                        if (productToEdit) {
+                            // Switch to register tab
+                            registerTab.click();
+                            
+                            // Populate form
+                            document.getElementById('nombre').value = productToEdit.name;
+                            document.getElementById('precio').value = productToEdit.price;
+                            document.getElementById('compra').value = productToEdit.cost;
+                            document.getElementById('mayoreo').value = productToEdit.wholesale;
+                            document.getElementById('cantidad').value = productToEdit.quantity;
+                            document.getElementById('sku').value = productToEdit.sku;
+                            document.getElementById('foto1').value = productToEdit.photoUrl;
+                            document.getElementById('code').value = productToEdit.code;
+                            editRowIndexInput.value = productToEdit.rowIndex;
+
+                            submitButton.textContent = 'Actualizar Producto';
+                        }
+                    }
+                    if (e.target.classList.contains('delete-product-btn')) {
+                        // This requires backend logic modification which is not possible here.
+                        // We will simulate the behavior and log to console.
+                        const rowIndex = e.target.dataset.rowIndex;
+                        alert(`Funcionalidad para eliminar producto (fila ${rowIndex}) no implementada en el script de Google. Se requiere una actualización del backend.`);
+                        console.log(`DELETE request for product at row ${rowIndex}`);
+                    }
+                });
+
+
                 const googleScriptURL = 'https://script.google.com/macros/s/AKfycbzkmr5vz2v-6o-krK84pasC3d4xydqNiIyw0wPnhOG7Tj66-elnTBFQvzZkGnzDPsWO/exec';
 
                 productForm.addEventListener('submit', function(e) {
                     e.preventDefault(); 
                     submitButton.disabled = true;
-                    submitButton.textContent = 'Registrando...';
+                    const isEditing = !!editRowIndexInput.value;
+                    submitButton.textContent = isEditing ? 'Actualizando...' : 'Registrando...';
 
                     const formData = new FormData(productForm);
                     const data = {};
@@ -1303,6 +1418,9 @@
                             data[key] = value;
                         }
                     });
+
+                    // Add action for the backend to know if it's an update or add
+                    data.action = isEditing ? 'update' : 'add';
 
                     fetch(googleScriptURL, {
                         method: 'POST',
@@ -1315,8 +1433,10 @@
                     .then(response => {
                         console.log('Respuesta del servidor:', response);
                         if (response.result === 'success') {
-                            showStatusMessage('¡Producto registrado con éxito!', 'success');
-                            productForm.reset(); 
+                            showStatusMessage(`¡Producto ${isEditing ? 'actualizado' : 'registrado'} con éxito!`, 'success');
+                            productForm.reset();
+                            editRowIndexInput.value = '';
+                            loadProducts(); // Refresh product list
                         } else {
                             showStatusMessage(`Error: ${response.error}`, 'error');
                         }
