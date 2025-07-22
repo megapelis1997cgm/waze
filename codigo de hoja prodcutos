@@ -1,0 +1,52 @@
+/**
+ * Se ejecuta cuando se envían datos para registrar un nuevo producto.
+ * Espera recibir un objeto JSON con los detalles del producto.
+ */
+function doPost(e) {
+  try {
+    // Es recomendable especificar el nombre de la hoja donde guardarás los datos.
+    // Reemplaza "NombreDeTuHoja" por el nombre real, por ejemplo, "Inventario".
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("NombreDeTuHoja");
+
+    // Si la hoja no existe, puedes crearla o usar la activa como alternativa
+    if (!sheet) {
+      sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    }
+    
+    // Parsea los datos JSON enviados en la solicitud POST.
+    var data = JSON.parse(e.postData.contents);
+    
+    // Extrae cada valor del objeto JSON.
+    var nombre = data.nombre;
+    var precio = data.precio;
+    var compra = data.compra;
+    var mayoreo = data.mayoreo;
+    var sku = data.sku;
+    var cantidad = data.cantidad;
+    var foto1 = data.foto1;
+    var code = data.code;
+    
+    // Agrega una nueva fila a la hoja con los datos en el orden especificado.
+    sheet.appendRow([
+      nombre,
+      precio,
+      compra,
+      mayoreo,
+      sku,
+      cantidad,
+      foto1,
+      code
+    ]);
+    
+    // Devuelve una respuesta de éxito en formato JSON.
+    return ContentService
+      .createTextOutput(JSON.stringify({ "result": "success", "message": "Producto registrado correctamente." }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    // Si ocurre un error, devuelve los detalles del error.
+    return ContentService
+      .createTextOutput(JSON.stringify({ "result": "error", "error": error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
