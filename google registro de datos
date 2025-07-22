@@ -1,0 +1,135 @@
+// Esta función se ejecuta cuando se guarda una nueva venta.
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+    
+    var saleDate = data.saleDate;
+    var saleNumber = data.saleNumber;
+    var clientName = data.clientName;
+    var clientPhone = data.clientPhone;
+    var clientNit = data.clientNit;
+    var seller = data.seller;
+    var items = data.items;
+    
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      sheet.appendRow([
+        saleDate,
+        saleNumber,
+        clientName,
+        clientPhone,
+        clientNit,
+        item.productName,
+        item.quantity,
+        item.unitCost,
+        item.discount,
+        item.total,
+        seller,
+        item.grossTotal,
+        item.discountAmount
+      ]);
+    }
+    
+    return ContentService
+      .createTextOutput(JSON.stringify({ "result": "success" }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ "result": "error", "error": error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// Esta función ahora puede obtener el siguiente número de venta, buscar una venta o generar un reporte.
+function doGet(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    
+    // CASO 1: Generar un reporte de ventas por rango de fechas
+    if (e.parameter.startDate && e.parameter.endDate) {
+      var startDate = new Date(e.parameter.startDate);
+      var endDate = new Date(e.parameter.endDate);
+      endDate.setHours(23, 59, 59, 999); // Asegura que se incluya todo el día final
+
+      var data = sheet.getDataRange().getValues();
+      var reportData = [];
+
+      for (var i = 1; i < data.length; i++) { // Empieza en 1 para saltar el encabezado
+        var saleDate = new Date(data[i][0]);
+        
+        if (saleDate >= startDate && saleDate <= endDate) {
+          // El orden de las columnas debe coincidir con tu hoja de historial
+          reportData.push({
+            date: new Date(data[i][0]).toLocaleDateString('es-BO'),
+            saleNumber: data[i][1],
+            productName: data[i][5],
+            quantity: data[i][6],
+            totalProduct: data[i][9] // Total Producto (con descuento)
+          });
+        }
+      }
+      return ContentService
+        .createTextOutput(JSON.stringify({ "result": "success", "reportData": reportData }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // CASO 2: Buscar una venta por su número
+    else if (e.parameter.searchSaleNumber) {
+      var saleNumberToFind = e.parameter.searchSaleNumber;
+      var data = sheet.getDataRange().getValues();
+      var saleData = { items: [] };
+      var found = false;
+
+      for (var i = 1; i < data.length; i++) {
+        if (data[i][1].toString() == saleNumberToFind) {
+          if (!found) {
+            saleData.saleDate = new Date(data[i][0]).toLocaleDateString('es-BO');
+            saleData.saleNumber = data[i][1];
+            saleData.clientName = data[i][2];
+            saleData.clientPhone = data[i][3];
+            saleData.clientNit = data[i][4];
+            found = true;
+          }
+          saleData.items.push({
+            productName: data[i][5],
+            quantity: data[i][6],
+            unitCost: data[i][7],
+            discount: data[i][8]
+          });
+        }
+      }
+
+      if (found) {
+        return ContentService
+          .createTextOutput(JSON.stringify({ "result": "success", "saleData": saleData }))
+          .setMimeType(ContentService.MimeType.JSON);
+      } else {
+        return ContentService
+          .createTextOutput(JSON.stringify({ "result": "error", "error": "Venta no encontrada." }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+
+    } else { // CASO 3: Obtener el siguiente número de venta
+      var lastRow = sheet.getLastRow();
+      var nextSaleNumber = 1; 
+
+      if (lastRow > 1) {
+        var lastSaleNumber = sheet.getRange(lastRow, 2).getValue();
+        if (typeof lastSaleNumber === 'number' && !isNaN(lastSaleNumber)) {
+          nextSaleNumber = lastSaleNumber + 1;
+        }
+      }
+      
+      return ContentService
+        .createTextOutput(JSON.stringify({ "result": "success", "nextSaleNumber": nextSaleNumber }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+      
+  } catch (error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ "result": "error", "error": error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
