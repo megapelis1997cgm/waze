@@ -1,0 +1,45 @@
+// Esta función se ejecuta cuando se guarda una nueva venta.
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+    
+    var saleDate = data.saleDate;
+    var saleNumber = data.saleNumber;
+    var clientName = data.clientName;
+    var clientPhone = data.clientPhone;
+    var clientNit = data.clientNit;
+    var seller = data.seller;
+    var items = data.items;
+    
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      sheet.appendRow([
+        saleDate,
+        saleNumber,
+        clientName,
+        clientPhone,
+        clientNit,
+        item.productName,
+        item.quantity,
+        item.unitCost,
+        item.discount,
+        item.total,
+        seller,
+        item.grossTotal,
+        item.discountAmount,
+        item.code,  // <-- DATO AÑADIDO PARA COLUMNA N
+        item.sku   // <-- DATO AÑADIDO PARA COLUMNA O
+      ]);
+    }
+    
+    return ContentService
+      .createTextOutput(JSON.stringify({ "result": "success" }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ "result": "error", "error": error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
