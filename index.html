@@ -1344,7 +1344,11 @@
                 function renderInventoryTable(products) {
                     inventoryTableBody.innerHTML = '';
                     const searchTerm = inventorySearchInput.value.toLowerCase();
-                    const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm) || (p.sku && p.sku.toLowerCase().includes(searchTerm)));
+                    const filteredProducts = products.filter(p => 
+                        p.name.toLowerCase().includes(searchTerm) || 
+                        (p.sku && p.sku.toLowerCase().includes(searchTerm)) ||
+                        (p.code && p.code.toLowerCase().includes(searchTerm))
+                    );
 
                     if (filteredProducts.length === 0) {
                         inventoryTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">No se encontraron productos.</td></tr>`;
