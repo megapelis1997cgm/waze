@@ -83,18 +83,30 @@
         <!-- Header -->
         <header class="bg-blue-900 text-white p-4 shadow-lg flex justify-between items-center sticky top-0 z-10">
             <img src="https://dcdn-us.mitiendanube.com/stores/004/546/736/themes/common/logo-660776128-1736645739-9bb5db1715d3b799cdf782b0f0815d541736645739-480-0.webp" alt="Logo Arelyshop Bolivia" class="h-12 w-auto">
-            <div class="text-right">
-                <p id="header-asesora" class="font-semibold text-lg"></p>
+            
+            <!-- Navegación de Pestañas -->
+            <div class="flex-grow flex justify-center">
+                <div class="flex items-center space-x-2 bg-blue-800 p-1 rounded-lg">
+                    <button id="nav-register-sale" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md focus:outline-none">Registrar Venta</button>
+                    <button id="nav-commissions" class="px-4 py-2 text-sm font-medium text-blue-200 hover:bg-blue-700 hover:text-white rounded-md focus:outline-none">Mis Ventas y Comisiones</button>
+                </div>
             </div>
-             <button id="logout-button" class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-900 focus:ring-red-500" aria-label="Cerrar Sesión">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-            </button>
+
+            <div class="flex items-center space-x-4">
+                <div class="text-right">
+                    <p id="header-asesora" class="font-semibold text-lg"></p>
+                </div>
+                 <button id="logout-button" class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-900 focus:ring-red-500" aria-label="Cerrar Sesión">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+            </div>
         </header>
 
-        <!-- Contenido Principal (Formulario de Ventas) -->
+        <!-- Contenido Principal -->
         <main class="flex-grow container mx-auto px-4 py-8">
+            <!-- Herramienta de Registro de Ventas -->
             <div id="sales-container" class="w-full max-w-3xl mx-auto">
                  <div class="text-center mb-8">
                     <h1 class="text-3xl font-bold text-gray-800">Registrar Nueva Venta</h1>
@@ -118,7 +130,7 @@
                             <input type="number" id="quantity" name="quantity" required min="1" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Ej: 1">
                         </div>
                         <div>
-                            <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">Monto Total ($)</label>
+                            <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">Monto Total (Bs.)</label>
                             <input type="number" id="amount" name="amount" step="0.01" required min="0" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Ej: 350.50">
                         </div>
                         <div>
@@ -160,6 +172,31 @@
                      <div id="message" class="mt-6 text-center text-sm font-medium" aria-live="polite"></div>
                 </form>
             </div>
+
+            <!-- Herramienta de Reporte de Comisiones -->
+            <div id="commissions-container" class="w-full max-w-6xl mx-auto hidden">
+                <div class="text-center mb-2 flex justify-center items-center gap-4">
+                    <h1 class="text-3xl font-bold text-gray-800">Mis Ventas y Comisiones</h1>
+                     <button id="refresh-report-button" class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" aria-label="Refrescar datos">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.899 2.186l-1.414 1.414A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm12 14a1 1 0 01-1-1v-2.101a7.002 7.002 0 01-11.899-2.186l1.414-1.414A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 01-1 1z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+                <p class="text-gray-500 mt-2 text-center mb-8">Un resumen de todas tus ventas y comisiones generadas.</p>
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                    <div id="report-summary" class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+                        <!-- Summary cards will be injected here by JS -->
+                    </div>
+                    <div id="report-loader" class="text-center py-10 hidden">
+                         <svg class="animate-spin h-8 w-8 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                         <p class="mt-2 text-gray-500">Cargando reporte...</p>
+                    </div>
+                    <div id="report-table-wrapper" class="overflow-x-auto">
+                        <!-- The report table will be injected here by JS -->
+                    </div>
+                </div>
+            </div>
         </main>
 
         <!-- Footer -->
@@ -170,8 +207,9 @@
 
     <script>
         // --- URLs ---
-        const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbzWpIQ5AcI4sLGUIxGQoSyjfJIjKfwvgn9vSfbr_c7SYeYur2iC7CGNJ-oRkVDogL6dU6hyJsue12/pub?output=csv";
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzROYgyZMBQkg4rcjEUuOHLIx-mkmkZX62Q-QD4i4O3HUpAqu2D9QJfvHps-zwR6aMT/exec";
+        const GOOGLE_SHEET_URL_USERS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQbzWpIQ5AcI4sLGUIxGQoSyjfJIjKfwvgn9vSfbr_c7SYeYur2iC7CGNJ-oRkVDogL6dU6hyJsue12/pub?output=csv";
+        const SCRIPT_URL_SALES_FORM = "https://script.google.com/macros/s/AKfycbzROYgyZMBQkg4rcjEUuOHLIx-mkmkZX62Q-QD4i4O3HUpAqu2D9QJfvHps-zwR6aMT/exec";
+        const GOOGLE_SHEET_URL_SALES_DATA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRRRV9f07ulN2N2fbQbfDcdzIChZ67qmTDewYG_NSJB2XQV3roKv1nQijiJazp2uAIJFKafVTje4vmf/pub?output=csv";
 
         // --- Elementos del DOM ---
         const loginWrapper = document.getElementById('login-wrapper');
@@ -181,23 +219,32 @@
         const loginMessage = document.getElementById('login-message');
         const salesMessage = document.getElementById('message');
         const logoutButton = document.getElementById('logout-button');
+        const salesContainer = document.getElementById('sales-container');
+        const commissionsContainer = document.getElementById('commissions-container');
+        const navRegisterSale = document.getElementById('nav-register-sale');
+        const navCommissions = document.getElementById('nav-commissions');
+        const reportTableWrapper = document.getElementById('report-table-wrapper');
+        const reportSummary = document.getElementById('report-summary');
+        const reportLoader = document.getElementById('report-loader');
+        const refreshReportButton = document.getElementById('refresh-report-button');
         
+        // --- Estado de la aplicación ---
         let users = [];
         let loggedInUser = null;
+        let allSales = []; // Caché para los datos de ventas del reporte
 
         // --- Funciones de Login y Logout ---
         
-        function parseCSV(csvText) {
+        function parseUsersCSV(csvText) {
             const lines = csvText.trim().split('\n');
             const userList = [];
-            // Empezamos en 1 para saltar la cabecera
-            for (let i = 1; i < lines.length; i++) {
+            for (let i = 1; i < lines.length; i++) { // Empezar en 1 para saltar la cabecera
                 const values = lines[i].split(',');
                 if (values.length >= 3) {
                     userList.push({
                         user: values[0].trim(),
                         password: values[1].trim(),
-                        fullName: values[2].trim().replace(/"/g, '') // Limpiar comillas
+                        fullName: values[2].trim().replace(/"/g, '')
                     });
                 }
             }
@@ -206,10 +253,10 @@
 
         async function fetchUsers() {
             try {
-                const response = await fetch(GOOGLE_SHEET_URL);
+                const response = await fetch(GOOGLE_SHEET_URL_USERS);
                 if (!response.ok) throw new Error('No se pudo cargar la lista de usuarios.');
                 const csvText = await response.text();
-                users = parseCSV(csvText);
+                users = parseUsersCSV(csvText);
             } catch (error) {
                 console.error("Error al cargar usuarios:", error);
                 showLoginMessage("Error crítico: No se pudo conectar con la base de datos de usuarios.", 'error');
@@ -229,6 +276,7 @@
                     loginWrapper.classList.add('hidden');
                     appContainer.classList.remove('hidden');
                     updateHeader();
+                    showRegisterView(); // Mostrar la vista de registro por defecto
                 }, 1000);
             } else {
                 showLoginMessage('Usuario o contraseña incorrectos.', 'error');
@@ -237,10 +285,11 @@
         
         function handleLogout() {
             loggedInUser = null;
+            allSales = []; // Limpiar caché de ventas al salir
             appContainer.classList.add('hidden');
             loginWrapper.classList.remove('hidden');
             loginForm.reset();
-            showLoginMessage('', 'success'); // Limpiar mensaje
+            showLoginMessage('', 'success');
         }
 
         function updateHeader() {
@@ -251,38 +300,42 @@
         function showLoginMessage(msg, type) {
             loginMessage.textContent = msg;
             loginMessage.className = 'mt-6 text-center text-sm font-medium';
-            if (type === 'success') loginMessage.classList.add('text-green-600');
-            else loginMessage.classList.add('text-red-600');
+            loginMessage.classList.add(type === 'success' ? 'text-green-600' : 'text-red-600');
         }
 
-        // --- Funciones del Formulario de Ventas ---
+        // --- Funciones de Navegación ---
+        function showRegisterView() {
+            salesContainer.classList.remove('hidden');
+            commissionsContainer.classList.add('hidden');
+            navRegisterSale.className = 'px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md focus:outline-none';
+            navCommissions.className = 'px-4 py-2 text-sm font-medium text-blue-200 hover:bg-blue-700 hover:text-white rounded-md focus:outline-none';
+        }
+
+        function showCommissionsView() {
+            salesContainer.classList.add('hidden');
+            commissionsContainer.classList.remove('hidden');
+            navCommissions.className = 'px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md focus:outline-none';
+            navRegisterSale.className = 'px-4 py-2 text-sm font-medium text-blue-200 hover:bg-blue-700 hover:text-white rounded-md focus:outline-none';
+            loadAndRenderReport(); // Cargar datos y mostrar el reporte
+        }
+
+        // --- Funciones del Formulario de Ventas (Herramienta 1) ---
 
         function handleSaleSubmit(e) {
             e.preventDefault();
-            // Validar campos requeridos
             const requiredFields = Array.from(salesForm.querySelectorAll('[required]'));
-            let allValid = true;
-            requiredFields.forEach(field => {
-                if (!field.value) {
-                    allValid = false;
-                }
-            });
-
-            if (!allValid) {
+            if (requiredFields.some(field => !field.value)) {
                 showSalesMessage('Por favor, completa todos los campos requeridos.', 'error');
                 return;
             }
 
             setLoading(true, 'sales');
             showSalesMessage('', 'success');
-
-            // Poblar campo oculto con el USUARIO de la asesora para el registro
             document.getElementById('salesPerson').value = loggedInUser.user;
-
             const formData = new FormData(salesForm);
             const saleData = Object.fromEntries(formData.entries());
 
-            fetch(SCRIPT_URL, {
+            fetch(SCRIPT_URL_SALES_FORM, {
                 method: 'POST',
                 redirect: 'follow',
                 body: JSON.stringify(saleData),
@@ -292,14 +345,8 @@
             .then(data => {
                 if (data.status === 'success') {
                     showSalesMessage('¡Venta registrada con éxito!', 'success');
-                    // Limpiar los campos del formulario
-                    document.getElementById('productName').value = '';
-                    document.getElementById('quantity').value = '';
-                    document.getElementById('amount').value = '';
-                    document.getElementById('paymentMethod').value = '';
-                    document.getElementById('saleType').value = '';
-                    document.getElementById('saleModality').value = '';
-                    document.getElementById('saleDate').valueAsDate = new Date(); // Restablece la fecha a hoy
+                    salesForm.reset();
+                    document.getElementById('saleDate').valueAsDate = new Date();
                 } else {
                     throw new Error(data.message || 'El script devolvió un error.');
                 }
@@ -315,23 +362,146 @@
         function showSalesMessage(msg, type) {
             salesMessage.textContent = msg;
             salesMessage.className = 'mt-6 text-center text-sm font-medium';
-            if (type === 'success') salesMessage.classList.add('text-green-600');
-            else salesMessage.classList.add('text-red-600');
+            salesMessage.classList.add(type === 'success' ? 'text-green-600' : 'text-red-600');
         }
 
+        // --- Funciones del Reporte de Comisiones (Herramienta 2) ---
+        function handleRefreshReport() {
+            const btn = document.getElementById('refresh-report-button');
+            btn.classList.add('animate-spin'); // Añadir animación
+            
+            allSales = []; // Limpiar la caché para forzar la recarga
+            
+            loadAndRenderReport().finally(() => {
+                // Quitar la animación cuando la carga haya finalizado (éxito o error)
+                btn.classList.remove('animate-spin');
+            });
+        }
+        
+        async function loadAndRenderReport() {
+            reportLoader.classList.remove('hidden');
+            reportTableWrapper.innerHTML = '';
+            reportSummary.innerHTML = '';
+
+            try {
+                // Si la caché está vacía, buscar los datos
+                if (allSales.length === 0) {
+                    const response = await fetch(GOOGLE_SHEET_URL_SALES_DATA);
+                    if (!response.ok) throw new Error('No se pudo cargar los datos de ventas.');
+                    const csvText = await response.text();
+                    allSales = parseSalesCSV(csvText); // Guardar en caché
+                }
+                const userSales = allSales.filter(sale => sale.user === loggedInUser.user);
+                renderSalesReport(userSales);
+            } catch (error) {
+                console.error("Error al cargar reporte:", error);
+                reportTableWrapper.innerHTML = `<p class="text-red-500 text-center p-4">${error.message}</p>`;
+            } finally {
+                reportLoader.classList.add('hidden');
+            }
+        }
+
+        function parseSalesCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            const salesList = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',');
+                if (values.length >= 8) {
+                    salesList.push({
+                        timestamp: values[0].trim(),
+                        saleDate: values[1].trim(),
+                        user: values[2].trim(),
+                        quantity: parseInt(values[3].trim(), 10) || 0,
+                        productName: values[4].trim().replace(/"/g, ''),
+                        paymentMethod: values[5].trim().replace(/"/g, ''),
+                        unitPrice: parseFloat(values[6].trim()) || 0,
+                        saleType: values[7].trim().replace(/"/g, ''),
+                    });
+                }
+            }
+            return salesList;
+        }
+
+        function renderSalesReport(sales) {
+            if (sales.length === 0) {
+                reportTableWrapper.innerHTML = '<p class="text-gray-500 text-center p-4">No tienes ventas registradas para mostrar.</p>';
+                reportSummary.innerHTML = '';
+                return;
+            }
+
+            let totalMinorista = 0, totalMayorista = 0;
+            let commissionMinorista = 0, commissionMayorista = 0;
+
+            const tableRows = sales.map(sale => {
+                const totalAmount = sale.quantity * sale.unitPrice;
+                const commissionRate = sale.saleType === 'Minorista' ? 0.05 : 0.01;
+                const commission = totalAmount * commissionRate;
+
+                if (sale.saleType === 'Minorista') {
+                    totalMinorista += totalAmount;
+                    commissionMinorista += commission;
+                } else if (sale.saleType === 'Mayorista') {
+                    totalMayorista += totalAmount;
+                    commissionMayorista += commission;
+                }
+
+                return `
+                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                        <td class="p-3 text-sm text-gray-700 whitespace-nowrap">${sale.saleDate}</td>
+                        <td class="p-3 text-sm text-gray-700">${sale.productName}</td>
+                        <td class="p-3 text-sm text-gray-700 text-center">${sale.quantity}</td>
+                        <td class="p-3 text-sm text-gray-700 text-right whitespace-nowrap">Bs. ${sale.unitPrice.toFixed(2)}</td>
+                        <td class="p-3 text-sm text-gray-700 text-right whitespace-nowrap font-semibold">Bs. ${totalAmount.toFixed(2)}</td>
+                        <td class="p-3 text-sm text-gray-700 whitespace-nowrap">${sale.saleType}</td>
+                        <td class="p-3 text-sm text-green-600 text-right whitespace-nowrap font-bold">Bs. ${commission.toFixed(2)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            reportTableWrapper.innerHTML = `
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b-2 border-gray-200">
+                        <tr>
+                            <th class="p-3 text-sm font-semibold tracking-wide text-left">Fecha Venta</th>
+                            <th class="p-3 text-sm font-semibold tracking-wide text-left">Producto</th>
+                            <th class="p-3 text-sm font-semibold tracking-wide text-center">Cantidad</th>
+                            <th class="p-3 text-sm font-semibold tracking-wide text-right">Precio Unit.</th>
+                            <th class="p-3 text-sm font-semibold tracking-wide text-right">Monto Total</th>
+                            <th class="p-3 text-sm font-semibold tracking-wide text-left">Tipo Venta</th>
+                            <th class="p-3 text-sm font-semibold tracking-wide text-right">Comisión</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">${tableRows}</tbody>
+                </table>`;
+
+            const totalSales = totalMinorista + totalMayorista;
+            const totalCommission = commissionMinorista + commissionMayorista;
+            reportSummary.innerHTML = `
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-blue-800 text-lg">Ventas Totales</h3>
+                    <p class="text-2xl font-bold text-blue-900 mt-1">Bs. ${totalSales.toFixed(2)}</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-green-800 text-lg">Comisiones Totales</h3>
+                    <p class="text-2xl font-bold text-green-900 mt-1">Bs. ${totalCommission.toFixed(2)}</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-gray-800 text-lg">Detalle Comisiones</h3>
+                    <p class="text-sm text-gray-600">Minorista: Bs. ${commissionMinorista.toFixed(2)}</p>
+                    <p class="text-sm text-gray-600">Mayorista: Bs. ${commissionMayorista.toFixed(2)}</p>
+                </div>`;
+        }
+
+
+        // --- Funciones de Utilidad ---
         function setLoading(isLoading, formType) {
             const button = formType === 'login' ? document.getElementById('login-button') : document.getElementById('submit-button');
             const text = formType === 'login' ? document.getElementById('login-button-text') : document.getElementById('button-text');
             const spinner = formType === 'login' ? document.getElementById('login-button-spinner') : document.getElementById('button-spinner');
 
             button.disabled = isLoading;
-            if (isLoading) {
-                text.classList.add('hidden');
-                spinner.classList.remove('hidden');
-            } else {
-                text.classList.remove('hidden');
-                spinner.classList.add('hidden');
-            }
+            text.classList.toggle('hidden', isLoading);
+            spinner.classList.toggle('hidden', !isLoading);
         }
 
         // --- Inicialización ---
@@ -340,8 +510,11 @@
             loginForm.addEventListener('submit', handleLogin);
             salesForm.addEventListener('submit', handleSaleSubmit);
             logoutButton.addEventListener('click', handleLogout);
+            navRegisterSale.addEventListener('click', showRegisterView);
+            navCommissions.addEventListener('click', showCommissionsView);
+            refreshReportButton.addEventListener('click', handleRefreshReport);
             document.getElementById('footer-year').textContent = new Date().getFullYear();
-            document.getElementById('saleDate').valueAsDate = new Date(); // Establece la fecha de hoy por defecto
+            document.getElementById('saleDate').valueAsDate = new Date();
         });
     </script>
 </body>
