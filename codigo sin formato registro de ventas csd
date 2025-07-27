@@ -1,0 +1,178 @@
+// ID de la Hoja de Cálculo de Google
+var SPREADSHEET_ID = "1stbqcokrjJtPJz0BZQ6ZM_Xo2as_lmWbDo3_j6zAzCw";
+// Nombre de la hoja específica donde se guardan las ventas
+var SHEET_NAME = "Ventas";
+
+/**
+ * Función centralizada para obtener o crear la hoja de ventas.
+ * Esto previene errores si la hoja no existe.
+ * @returns {Sheet|null} El objeto de la hoja de cálculo o null si hay un error.
+ */
+function getVentasSheet() {
+  try {
+    var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = spreadsheet.getSheetByName(SHEET_NAME);
+    
+    if (!sheet) {
+      // Si la hoja no existe, la creamos y añadimos los encabezados.
+      sheet = spreadsheet.insertSheet(SHEET_NAME);
+      sheet.appendRow([
+        "Fecha", "Nr Venta", "Nombre Cliente", "Teléfono", "NIT o CI", 
+        "SKU", "Código", "Producto", "Cantidad", "Costo Unit.", 
+        "Descuento (%)", "Total", "Vendedor", "Total Bruto", "Monto Descuento"
+      ]);
+    }
+    return sheet;
+  } catch (e) {
+    // Registra errores de acceso (ej. permisos incorrectos) para facilitar la depuración.
+    Logger.log("Error al acceder a la hoja de cálculo: " + e.toString());
+    return null;
+  }
+}
+
+/**
+ * Se ejecuta cuando se guarda una nueva venta desde el punto de venta.
+ */
+function doPost(e) {
+  try {
+    var sheet = getVentasSheet();
+    if (!sheet) {
+      throw new Error("No se pudo acceder a la hoja de cálculo. Verifique el ID y los permisos.");
+    }
+    
+    var data = JSON.parse(e.postData.contents);
+    
+    var saleDate = data.saleDate;
+    var saleNumber = data.saleNumber;
+    var clientName = data.clientName;
+    var clientPhone = data.clientPhone;
+    var clientNit = data.clientNit;
+    var seller = data.seller;
+    var items = data.items;
+    
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      // El orden de las columnas debe coincidir con el de la función getVentasSheet
+      sheet.appendRow([
+        saleDate, saleNumber, clientName, clientPhone, clientNit,
+        item.sku, item.code, item.productName, item.quantity, item.unitCost,
+        item.discount, item.total, seller, item.grossTotal, item.discountAmount
+      ]);
+    }
+    
+    return ContentService
+      .createTextOutput(JSON.stringify({ "result": "success" }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    Logger.log("Error en doPost: " + error.toString());
+    return ContentService
+      .createTextOutput(JSON.stringify({ "result": "error", "error": error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Se ejecuta para obtener datos: siguiente número de venta, buscar una venta o generar un reporte.
+ */
+function doGet(e) {
+  try {
+    var sheet = getVentasSheet();
+    if (!sheet) {
+      throw new Error("No se pudo acceder a la hoja de cálculo. Verifique el ID y los permisos.");
+    }
+    
+    // CASO 1: Generar un reporte de ventas por rango de fechas
+    if (e.parameter.startDate && e.parameter.endDate) {
+      var startDate = new Date(e.parameter.startDate);
+      var endDate = new Date(e.parameter.endDate);
+      endDate.setHours(23, 59, 59, 999);
+
+      var data = sheet.getDataRange().getValues();
+      var reportData = [];
+
+      for (var i = 1; i < data.length; i++) { 
+        var saleDate = new Date(data[i][0]);
+        
+        if (saleDate >= startDate && saleDate <= endDate) {
+          reportData.push({
+            date: new Date(data[i][0]).toLocaleDateString('es-BO'),
+            saleNumber: data[i][1],
+            sku: data[i][5], 
+            productName: data[i][7],
+            quantity: data[i][8],
+            totalProduct: data[i][11]
+          });
+        }
+      }
+      return ContentService
+        .createTextOutput(JSON.stringify({ "result": "success", "reportData": reportData }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // CASO 2: Buscar una venta por su número
+    else if (e.parameter.searchSaleNumber) {
+      var saleNumberToFind = e.parameter.searchSaleNumber;
+      var data = sheet.getDataRange().getValues();
+      var saleData = { items: [] };
+      var found = false;
+
+      for (var i = 1; i < data.length; i++) {
+        if (data[i][1].toString() == saleNumberToFind) {
+          if (!found) {
+            saleData.saleDate = new Date(data[i][0]).toLocaleDateString('es-BO');
+            saleData.saleNumber = data[i][1];
+            saleData.clientName = data[i][2];
+            saleData.clientPhone = data[i][3];
+            saleData.clientNit = data[i][4];
+            found = true;
+          }
+          saleData.items.push({
+            sku: data[i][5],
+            code: data[i][6],
+            productName: data[i][7],
+            quantity: data[i][8],
+            unitCost: data[i][9],
+            discount: data[i][10]
+          });
+        }
+      }
+
+      if (found) {
+        return ContentService
+          .createTextOutput(JSON.stringify({ "result": "success", "saleData": saleData }))
+          .setMimeType(ContentService.MimeType.JSON);
+      } else {
+        return ContentService
+          .createTextOutput(JSON.stringify({ "result": "error", "error": "Venta no encontrada." }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+
+    } else { // CASO 3: Obtener el siguiente número de venta
+      var lastRow = sheet.getLastRow();
+      var nextSaleNumber = 1; 
+
+      if (lastRow > 1) {
+        // Lógica mejorada para encontrar el número de venta más alto en toda la columna.
+        var saleNumbersRange = sheet.getRange(2, 2, lastRow - 1, 1);
+        var saleNumberValues = saleNumbersRange.getValues();
+        
+        var maxSaleNumber = saleNumberValues.reduce(function(max, row) {
+            var currentNum = Number(row[0]);
+            return (!isNaN(currentNum) && currentNum > max) ? currentNum : max;
+        }, 0);
+        nextSaleNumber = maxSaleNumber + 1;
+      }
+      
+      return ContentService
+        .createTextOutput(JSON.stringify({ "result": "success", "nextSaleNumber": nextSaleNumber }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+      
+  } catch (error) {
+    Logger.log("Error en doGet: " + error.toString());
+    return ContentService
+      .createTextOutput(JSON.stringify({ "result": "error", "error": error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
